@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photo Booth</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+    <div class="grain"></div>
+    <div class="vignette"></div>
+
+    <!-- Film strip sprocket holes -->
+    <div class="sprockets left">
+        <span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span>
+    </div>
+    <div class="sprockets right">
+        <span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span>
+    </div>
+
+    <!-- SCREEN 1: Welcome / Idle -->
+    <div class="screen active" id="screen-welcome">
+        <div class="film-border top"></div>
+        <div class="film-border bottom"></div>
+
+        <div class="welcome-content">
+            <p class="eyebrow">&#9673; Now Showing &#9673;</p>
+            <h1 class="headline">Looking to<br><em>savour a moment?</em></h1>
+            <p class="subline">Step inside. Make it last.</p>
+            <button class="btn-primary" onclick="goToSteps()">Let's Go</button>
+        </div>
+    </div>
+
+    <!-- SCREEN 2: Steps + Payment -->
+    <div class="screen" id="screen-steps">
+        <div class="film-border top"></div>
+        <div class="film-border bottom"></div>
+
+        <div class="steps-content">
+            <p class="eyebrow">&#9673; Here's How It Works &#9673;</p>
+            <h2 class="steps-title">Four easy steps</h2>
+
+            <div class="steps-grid">
+                <div class="step">
+                    <span class="step-number">01</span>
+                    <p class="step-label">Strike a pose</p>
+                    <p class="step-desc">Get your crew together. The booth fits up to 4.</p>
+                </div>
+                <div class="step">
+                    <span class="step-number">02</span>
+                    <p class="step-label">We shoot 4 frames</p>
+                    <p class="step-desc">A countdown for each. No pressure, just vibes.</p>
+                </div>
+                <div class="step">
+                    <span class="step-number">03</span>
+                    <p class="step-label">We print your strip</p>
+                    <p class="step-desc">Fresh off the press in under 30 seconds.</p>
+                </div>
+                <div class="step">
+                    <span class="step-number">04</span>
+                    <p class="step-label">Scan &amp; keep forever</p>
+                    <p class="step-desc">QR code on your strip. Download the digital copy anytime.</p>
+                </div>
+            </div>
+
+            <div class="price-tag">
+                <span class="price-amount">£5</span>
+                <span class="price-note">per session · print + digital included</span>
+            </div>
+
+            <button class="btn-primary" onclick="goToPayment()">Press to Pay</button>
+        </div>
+    </div>
+
+    <!-- SCREEN 3: Payment -->
+    <div class="screen" id="screen-payment">
+        <div class="film-border top"></div>
+        <div class="film-border bottom"></div>
+
+        <div class="payment-content">
+            <p class="eyebrow">&#9673; Payment &#9673;</p>
+            <h2 class="headline"><em>£5</em> per session</h2>
+            <p class="subline">print + digital included</p>
+
+            <div class="tap-zone" id="tap-zone">
+                <div class="tap-ring"></div>
+                <div class="tap-ring"></div>
+                <div class="tap-ring"></div>
+                <div class="tap-card-icon"></div>
+            </div>
+
+            <p class="tap-label">Tap your card to continue</p>
+            <p class="tap-status" id="tap-status"></p>
+
+            <button class="btn-secondary" onclick="cancelPayment()">&#8592; Back</button>
+        </div>
+    </div>
+
+    <!-- SCREEN 4: Camera + Countdown -->
+    <div class="screen" id="screen-camera">
+        <div class="flash" id="flash"></div>
+
+        <div class="camera-content">
+            <img src="/preview" id="camera-feed" alt="camera preview">
+
+            <!-- corners for retro viewfinder feel -->
+            <div class="viewfinder">
+                <span class="corner tl"></span>
+                <span class="corner tr"></span>
+                <span class="corner bl"></span>
+                <span class="corner br"></span>
+            </div>
+
+            <div class="camera-overlay">
+                <p class="photo-counter" id="photo-counter">Photo 1 of 4</p>
+                <div class="countdown-number" id="countdown">3</div>
+                <p class="smile-text" id="smile-text"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCREEN 5: Processing / Strip reveal -->
+    <div class="screen" id="screen-processing">
+        <div class="film-border top"></div>
+        <div class="film-border bottom"></div>
+
+        <div class="processing-content">
+            <div class="strip-side">
+                <img id="strip-img" src="" alt="your photo strip">
+            </div>
+            <div class="strip-info">
+                <p class="eyebrow">&#9673; All done &#9673;</p>
+                <h2 class="headline"><em>Here's your strip</em></h2>
+                <p class="subline" id="strip-status">Developing your film&hellip;</p>
+
+                <div class="qr-block" id="qr-block" style="display:none">
+                    <img id="qr-img" src="" alt="QR code">
+                    <p class="qr-label">Scan to download your photos</p>
+                </div>
+
+                <div class="strip-actions">
+                    <button class="btn-secondary" onclick="resetBooth()">&#8592; Start Over</button>
+                </div>
+
+                <div class="reset-countdown" id="reset-countdown" style="display:none">
+                    Resetting in <strong id="reset-seconds"></strong>s &nbsp;·&nbsp;
+                    <button class="btn-link" onclick="extendProcessingTimer()">Keep viewing</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCREEN 6: Error -->
+    <div class="screen" id="screen-error">
+        <div class="film-border top"></div>
+        <div class="film-border bottom"></div>
+
+        <div class="error-content">
+            <p class="eyebrow">&#9673; Error &#9673;</p>
+            <h2 class="headline" id="error-title"><em>Something went wrong</em></h2>
+            <p class="subline" id="error-message"></p>
+            <div class="error-session" id="error-session" style="display:none">
+                <p class="error-session-label">Please show this to our staff</p>
+                <p class="error-session-id" id="error-session-id"></p>
+            </div>
+            <div class="error-actions">
+                <button class="btn-primary" id="error-btn-primary">Try Again</button>
+                <button class="btn-secondary" id="error-btn-secondary" style="display:none">Start Over</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Config from .env, injected by Flask — no secrets exposed here.
+        window.INACTIVITY_TIMEOUT_MS  = {{ inactivity_timeout_ms }};
+        window.PROCESSING_RESET_MS    = {{ processing_reset_ms }};
+        window.PHOTOS_PER_SESSION     = {{ photos_per_session }};
+        window.COUNTDOWN_SECS         = {{ countdown_secs }};
+    </script>
+    <script src="/static/js/app.js"></script>
+    <script src="/static/js/inactivity.js"></script>
+</body>
+</html>

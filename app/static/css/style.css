@@ -1,0 +1,638 @@
+/* ── Reset & Base ───────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+    --bg:         #f7f0e3;
+    --bg-card:    #ede4d0;
+    --brown:      #3b2a1a;
+    --brown-mid:  #7a5c3e;
+    --brown-light:#b08a66;
+    --accent:     #a0522d;
+    --serif:      'Playfair Display', Georgia, serif;
+    --body:       'Lora', Georgia, serif;
+}
+
+html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    background: var(--bg);
+    color: var(--brown);
+    font-family: var(--body);
+}
+
+/* ── Subtle grain on light bg ───────────────────────────── */
+.grain {
+    position: fixed; inset: 0; z-index: 100;
+    pointer-events: none;
+    opacity: 0.03;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    background-size: 180px 180px;
+    animation: grain-shift 0.2s steps(1) infinite;
+}
+
+@keyframes grain-shift {
+    0%   { background-position: 0 0; }
+    25%  { background-position: -30px 10px; }
+    50%  { background-position: 10px -20px; }
+    75%  { background-position: -15px -10px; }
+    100% { background-position: 5px 25px; }
+}
+
+/* ── Vignette — very soft on light ─────────────────────── */
+.vignette {
+    position: fixed; inset: 0; z-index: 99;
+    pointer-events: none;
+    background: radial-gradient(ellipse at center,
+        transparent 50%,
+        rgba(80, 50, 20, 0.12) 100%);
+}
+
+/* ── Sprocket Holes ─────────────────────────────────────── */
+.sprockets {
+    position: fixed; top: 0; bottom: 0;
+    z-index: 98;
+    width: 48px;
+    background: var(--brown);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+    padding: 16px 0;
+}
+.sprockets.left  { left: 0; }
+.sprockets.right { right: 0; }
+
+.sprockets span {
+    display: block;
+    width: 26px; height: 18px;
+    border-radius: 3px;
+    background: var(--bg);
+    flex-shrink: 0;
+}
+
+/* ── Film Border Bars ───────────────────────────────────── */
+.film-border {
+    position: absolute; left: 0; right: 0;
+    height: 8px;
+    background: var(--brown);
+    opacity: 0.15;
+}
+.film-border.top    { top: 0; }
+.film-border.bottom { bottom: 0; }
+
+/* ── Screens ────────────────────────────────────────────── */
+.screen {
+    position: fixed;
+    top: 0; left: 48px; right: 48px; bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(18px);
+    transition: opacity 0.65s ease, transform 0.65s ease;
+}
+
+.screen.active {
+    opacity: 1;
+    pointer-events: all;
+    transform: translateY(0);
+}
+
+.screen.exit {
+    opacity: 0;
+    transform: translateY(-18px);
+}
+
+/* ── Eyebrow ────────────────────────────────────────────── */
+.eyebrow {
+    font-family: var(--body);
+    font-size: 0.8rem;
+    letter-spacing: 0.3em;
+    color: var(--brown-light);
+    text-transform: uppercase;
+}
+
+/* ── Welcome Screen ─────────────────────────────────────── */
+.welcome-content {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+}
+
+.headline {
+    font-family: var(--serif);
+    font-size: clamp(2.6rem, 5.5vw, 4.6rem);
+    font-weight: 400;
+    line-height: 1.2;
+    color: var(--brown);
+}
+
+.headline em {
+    font-style: italic;
+    color: var(--accent);
+}
+
+.subline {
+    font-family: var(--body);
+    font-size: 1.05rem;
+    color: var(--brown-mid);
+    letter-spacing: 0.06em;
+    font-style: italic;
+}
+
+/* ── Divider ────────────────────────────────────────────── */
+.divider {
+    width: 60px;
+    height: 1px;
+    background: var(--brown-light);
+    opacity: 0.5;
+}
+
+/* ── Buttons ────────────────────────────────────────────── */
+.btn-primary {
+    font-family: var(--body);
+    font-size: 1rem;
+    font-style: italic;
+    letter-spacing: 0.12em;
+    color: #fff;
+    background: var(--accent);
+    border: none;
+    padding: 16px 52px;
+    border-radius: 2px;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.15s ease;
+    box-shadow: 3px 3px 0px var(--brown-mid);
+}
+
+.btn-primary:hover {
+    background: var(--brown);
+    transform: translate(-2px, -2px);
+    box-shadow: 5px 5px 0px var(--brown-mid);
+}
+
+.btn-primary:active {
+    transform: translate(1px, 1px);
+    box-shadow: 1px 1px 0px var(--brown-mid);
+}
+
+.btn-secondary {
+    font-family: var(--body);
+    font-size: 0.9rem;
+    font-style: italic;
+    letter-spacing: 0.1em;
+    color: var(--brown-mid);
+    background: transparent;
+    border: 1px solid var(--brown-light);
+    padding: 12px 32px;
+    border-radius: 2px;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: color 0.2s, border-color 0.2s;
+}
+
+.btn-secondary:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+}
+
+/* ── Steps Screen ───────────────────────────────────────── */
+.steps-content {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 28px;
+    padding: 40px 0;
+}
+
+.steps-title {
+    font-family: var(--serif);
+    font-size: clamp(1.5rem, 3vw, 2.2rem);
+    font-weight: 400;
+    font-style: italic;
+    color: var(--brown);
+}
+
+.steps-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    max-width: 860px;
+    width: 100%;
+    padding: 0 20px;
+}
+
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 24px 14px;
+    border: 1px solid rgba(59, 42, 26, 0.15);
+    border-radius: 2px;
+    background: var(--bg-card);
+}
+
+.step-number {
+    font-family: var(--serif);
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--accent);
+    opacity: 0.45;
+    line-height: 1;
+}
+
+.step-label {
+    font-family: var(--serif);
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--brown);
+}
+
+.step-desc {
+    font-family: var(--body);
+    font-size: 0.82rem;
+    font-style: italic;
+    color: var(--brown-mid);
+    line-height: 1.55;
+}
+
+/* ── Price Tag ──────────────────────────────────────────── */
+.price-tag {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    border-top: 1px solid rgba(59,42,26,0.15);
+    border-bottom: 1px solid rgba(59,42,26,0.15);
+    padding: 12px 40px;
+}
+
+.price-amount {
+    font-family: var(--serif);
+    font-size: 2.6rem;
+    font-weight: 700;
+    color: var(--accent);
+}
+
+.price-note {
+    font-family: var(--body);
+    font-size: 0.85rem;
+    font-style: italic;
+    color: var(--brown-mid);
+}
+
+/* ── Placeholder Screen ─────────────────────────────────── */
+.placeholder-content {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+}
+
+/* ── Payment Screen ─────────────────────────────────────── */
+.payment-content {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+}
+
+.tap-zone {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 8px 0;
+}
+
+.tap-ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 2px solid var(--accent);
+    opacity: 0;
+    animation: tap-ripple 2.4s ease-out infinite;
+}
+
+.tap-ring:nth-child(1) { width: 36px;  height: 36px;  animation-delay: 0s; }
+.tap-ring:nth-child(2) { width: 68px;  height: 68px;  animation-delay: 0.7s; }
+.tap-ring:nth-child(3) { width: 100px; height: 100px; animation-delay: 1.4s; }
+
+@keyframes tap-ripple {
+    0%   { opacity: 0.65; transform: scale(0.85); }
+    100% { opacity: 0;    transform: scale(1.05); }
+}
+
+.tap-zone.approved .tap-ring {
+    animation: none;
+    opacity: 0;
+}
+
+.tap-card-icon {
+    width: 52px;
+    height: 34px;
+    background: var(--accent);
+    border-radius: 5px;
+    position: relative;
+    z-index: 1;
+    box-shadow: 2px 2px 0 var(--brown-mid);
+    transition: background 0.3s ease;
+}
+
+.tap-card-icon::after {
+    content: '';
+    position: absolute;
+    bottom: 9px;
+    left: 8px;
+    right: 8px;
+    height: 3px;
+    background: rgba(255,255,255,0.4);
+    border-radius: 1px;
+}
+
+.tap-zone.approved .tap-card-icon {
+    background: #5a8a4a;
+}
+
+.tap-label {
+    font-family: var(--body);
+    font-size: 1rem;
+    font-style: italic;
+    color: var(--brown-mid);
+    letter-spacing: 0.05em;
+}
+
+.tap-status {
+    font-family: var(--serif);
+    font-size: 1.05rem;
+    font-style: italic;
+    color: var(--brown-light);
+    min-height: 1.6rem;
+    transition: color 0.3s ease;
+}
+
+.tap-status.approved { color: #5a8a4a; }
+.tap-status.error    { color: var(--accent); }
+
+/* ── Camera Screen ──────────────────────────────────────── */
+#screen-camera {
+    padding: 0;
+    overflow: hidden;
+}
+
+.camera-content {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #000;
+}
+
+#camera-feed {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: sepia(0.15) contrast(1.05);
+}
+
+/* ── Viewfinder Corners ─────────────────────────────────── */
+.viewfinder {
+    position: absolute;
+    inset: 24px;
+    pointer-events: none;
+}
+
+.corner {
+    position: absolute;
+    width: 28px;
+    height: 28px;
+    border-color: rgba(255,255,255,0.7);
+    border-style: solid;
+}
+.corner.tl { top: 0; left: 0;  border-width: 2px 0 0 2px; }
+.corner.tr { top: 0; right: 0; border-width: 2px 2px 0 0; }
+.corner.bl { bottom: 0; left: 0;  border-width: 0 0 2px 2px; }
+.corner.br { bottom: 0; right: 0; border-width: 0 2px 2px 0; }
+
+/* ── Camera Overlay (counter + countdown) ───────────────── */
+.camera-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    gap: 8px;
+}
+
+.photo-counter {
+    position: absolute;
+    top: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--body);
+    font-size: 0.85rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.85);
+    background: rgba(0,0,0,0.3);
+    padding: 6px 18px;
+    border-radius: 2px;
+}
+
+.countdown-number {
+    font-family: var(--serif);
+    font-size: 11rem;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1;
+    text-shadow: 0 4px 40px rgba(0,0,0,0.4);
+    opacity: 0;
+    transform: scale(0.6);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.countdown-number.show {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.countdown-number.shrink {
+    opacity: 0;
+    transform: scale(1.4);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.smile-text {
+    font-family: var(--serif);
+    font-size: 1.6rem;
+    font-style: italic;
+    color: rgba(255,255,255,0.9);
+    text-shadow: 0 2px 12px rgba(0,0,0,0.4);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    min-height: 2.4rem;
+}
+
+.smile-text.show {
+    opacity: 1;
+}
+
+/* ── Processing / Strip Screen ──────────────────────────── */
+.processing-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 60px;
+    padding: 40px;
+    height: 100%;
+    width: 100%;
+}
+
+.strip-side {
+    flex-shrink: 0;
+    height: 85vh;
+    display: flex;
+    align-items: center;
+}
+
+#strip-img {
+    height: 100%;
+    width: auto;
+    max-width: 320px;
+    object-fit: contain;
+    border: 1px solid rgba(59,42,26,0.15);
+    box-shadow: 6px 6px 0 rgba(59,42,26,0.1);
+    opacity: 0;
+    transition: opacity 0.6s ease;
+}
+
+#strip-img.loaded {
+    opacity: 1;
+}
+
+.strip-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+    max-width: 360px;
+}
+
+.strip-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.reset-countdown {
+    font-size: 0.78rem;
+    color: rgba(59,42,26,0.45);
+    margin-top: 4px;
+}
+
+.btn-link {
+    background: none;
+    border: none;
+    padding: 0;
+    font: inherit;
+    font-size: 0.78rem;
+    color: rgba(59,42,26,0.6);
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.qr-block {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.qr-block img {
+    width: 140px;
+    height: 140px;
+    border: 1px solid rgba(59,42,26,0.15);
+    padding: 6px;
+    background: #fff;
+}
+
+.qr-label {
+    font-family: var(--body);
+    font-size: 0.85rem;
+    font-style: italic;
+    color: var(--brown-mid);
+}
+
+/* ── Error Screen ───────────────────────────────────────── */
+.error-content {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    max-width: 520px;
+}
+
+.error-session {
+    background: var(--bg-card);
+    border: 1px solid rgba(59,42,26,0.2);
+    border-radius: 2px;
+    padding: 18px 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.error-session-label {
+    font-family: var(--body);
+    font-size: 0.85rem;
+    font-style: italic;
+    color: var(--brown-mid);
+    letter-spacing: 0.05em;
+}
+
+.error-session-id {
+    font-family: var(--serif);
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: 0.3em;
+    color: var(--accent);
+}
+
+.error-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+/* ── Flash effect ───────────────────────────────────────── */
+.flash {
+    position: absolute;
+    inset: 0;
+    background: #fff;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 50;
+    transition: opacity 0.05s ease;
+}
+
+.flash.active {
+    opacity: 1;
+    transition: opacity 0.05s ease;
+}
