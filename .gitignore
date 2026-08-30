@@ -33,3 +33,6 @@ Thumbs.db
 
 # Claude Code
 .claude/
+
+# Personal reference docs
+GIT_WORKFLOW.md
