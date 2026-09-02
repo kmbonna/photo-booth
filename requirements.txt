@@ -1,0 +1,6 @@
+flask
+python-dotenv
+Pillow
+opencv-python-headless
+numpy
+qrcode[pil]

@@ -1,20 +1,22 @@
 # Maintenance Guide
 
-How to manage the booth remotely after it's live. Everything here assumes you've set up a Cloudflare SSH tunnel on the Pi (see WHATS_NEXT.md → Remote Access).
+How to manage the booth remotely after it's live. Remote access is via Tailscale (see PI_SETUP.md).
 
 ---
 
 ## Getting In
 
+Double-click **ssh-pi.bat** on the Desktop, or run:
+
 ```bash
-ssh pi@your-tunnel-hostname
+ssh pbpi-1@100.69.73.14
 ```
 
-That's it. Works from any network, anywhere. No VPN, no port forwarding.
+Works from any network, anywhere, as long as the Pi is online and Tailscale is running on your laptop.
 
-Once in, you're on the Pi. The booth code lives at:
+Once in, the booth code lives at:
 ```bash
-cd ~/Photo_Booth
+cd ~/photo-booth
 ```
 
 ---
@@ -26,12 +28,12 @@ Two systemd services run on the Pi at all times:
 | Service | What it is |
 |---|---|
 | `photobooth` | Your Flask app — the booth itself |
-| `cloudflared` | The Cloudflare tunnel — your remote access |
+| `tailscaled` | Tailscale — your remote access |
 
 Check both are alive:
 ```bash
 systemctl status photobooth
-systemctl status cloudflared
+systemctl status tailscaled
 ```
 
 ---
@@ -216,7 +218,7 @@ For these, someone needs to go to the booth. That's the main reason to know some
 
 ```bash
 # Check both services
-systemctl status photobooth cloudflared
+systemctl status photobooth tailscaled
 
 # Restart Flask
 systemctl restart photobooth

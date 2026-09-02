@@ -1,9 +1,7 @@
 import cv2
 import os
-import sys
 import threading
 import time
-import numpy as np
 
 from modules import log
 logger = log.get(__name__)
@@ -12,37 +10,6 @@ _latest_frame = None
 _running = False
 _lock = threading.Lock()
 _thread = None
-
-# On Windows, real camera access through OpenCV is blocked by the Windows
-# Camera Frame Server (post-2019 architecture). Use a dev-mode placeholder
-# so the full UI can be tested. On Linux (Raspberry Pi), the real camera works.
-_DEV_MODE = sys.platform == "win32"
-
-
-def _make_dev_frame():
-    """Generate a fake camera frame for Windows dev mode."""
-    frame = np.zeros((720, 1280, 3), dtype=np.uint8)
-    frame[:] = (40, 35, 30)  # dark warm background
-    cv2.putText(frame, "CAMERA DEV MODE", (360, 340),
-                cv2.FONT_HERSHEY_SIMPLEX, 2.0, (120, 160, 200), 3, cv2.LINE_AA)
-    cv2.putText(frame, "Windows only - real camera active on Pi", (310, 410),
-                cv2.FONT_HERSHEY_SIMPLEX, 0.9, (90, 120, 150), 2, cv2.LINE_AA)
-    return frame
-
-
-def _dev_loop():
-    global _latest_frame, _running
-    while _running:
-        frame = _make_dev_frame()
-        # Animate a simple pulsing dot so the preview looks live
-        t = time.time()
-        cx, cy = 640, 550
-        r = int(10 + 6 * abs(np.sin(t * 2)))
-        color = (0, int(180 + 60 * abs(np.sin(t * 2))), 0)
-        cv2.circle(frame, (cx, cy), r, color, -1)
-        with _lock:
-            _latest_frame = frame
-        time.sleep(0.033)  # ~30 fps
 
 
 def _camera_loop():
@@ -53,13 +20,12 @@ def _camera_loop():
     cam.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'MJPG'))
 
     if not cam.isOpened():
-        logger.error("Camera failed to open — check connection and index")
+        logger.error("Camera failed to open — check connection and CAMERA_INDEX")
         _running = False
         return
 
     logger.info("Camera opened successfully")
-
-    for _ in range(30):
+    for _ in range(30):  # flush stale frames on startup
         cam.read()
 
     consecutive_failures = 0
@@ -67,15 +33,14 @@ def _camera_loop():
         ret, frame = cam.read()
         if ret:
             consecutive_failures = 0
-            frame = cv2.flip(frame, 1)
             with _lock:
-                _latest_frame = frame
+                _latest_frame = cv2.flip(frame, 1)
         else:
             consecutive_failures += 1
             if consecutive_failures == 10:
                 logger.warning("Camera: 10 consecutive read failures")
             elif consecutive_failures == 50:
-                logger.error("Camera: 50 consecutive read failures — camera may be disconnected")
+                logger.error("Camera: 50 consecutive read failures — may be disconnected")
             time.sleep(0.05)
 
     cam.release()
@@ -87,11 +52,9 @@ def start():
     if _running:
         return
     _running = True
-    loop = _dev_loop if _DEV_MODE else _camera_loop
-    _thread = threading.Thread(target=loop, daemon=True)
+    _thread = threading.Thread(target=_camera_loop, daemon=True)
     _thread.start()
-    if not _DEV_MODE:
-        time.sleep(3)  # let real camera warm up
+    time.sleep(3)  # let camera warm up
 
 
 def generate_preview():
@@ -103,9 +66,8 @@ def generate_preview():
             time.sleep(0.03)
             continue
         quality = int(os.environ.get('PREVIEW_JPEG_QUALITY', 75))
-        _, buffer = cv2.imencode('.jpg', frame, [cv2.IMWRITE_JPEG_QUALITY, quality])
-        yield (b'--frame\r\nContent-Type: image/jpeg\r\n\r\n'
-               + buffer.tobytes() + b'\r\n')
+        _, buf = cv2.imencode('.jpg', frame, [cv2.IMWRITE_JPEG_QUALITY, quality])
+        yield b'--frame\r\nContent-Type: image/jpeg\r\n\r\n' + buf.tobytes() + b'\r\n'
 
 
 def capture_photo(session_id, photo_number):
@@ -118,9 +80,8 @@ def capture_photo(session_id, photo_number):
     session_dir = os.path.join(base, session_id)
     os.makedirs(session_dir, exist_ok=True)
     path = os.path.join(session_dir, f'photo_{photo_number}.jpg')
-    ok = cv2.imwrite(path, frame)
-    if not ok:
-        logger.error("capture_photo: imwrite failed — disk full? (path=%s)", path)
+    if not cv2.imwrite(path, frame):
+        logger.error("capture_photo: imwrite failed (path=%s)", path)
         return None
     return path
 
