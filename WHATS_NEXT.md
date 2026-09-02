@@ -4,7 +4,7 @@
 
 ## Product Ideas
 
-Things that would make the booth more interesting or profitable. None of these are blockers — they're additions for after the first version is live.
+Things that would make the booth more interesting or profitable. None of these are blockers — they're additions for after the first version is live
 
 ### Mood Filters
 Let the customer pick a look before the countdown starts. Add a new screen between payment and camera with 5–6 options. Each mood is a Pillow colour matrix applied to every photo before stitching.
