@@ -16,7 +16,7 @@ from modules.qr import generate_qr_bytes
 logger = log.get('main')
 
 # Keep werkzeug at INFO so startup "Running on http://..." lines appear in the terminal.
-logging.getLogger('werkzeug').setLevel(logging.WARNING)
+logging.getLogger('werkzeug').setLevel(logging.INFO)
 
 logger.info("booth starting up")
 
