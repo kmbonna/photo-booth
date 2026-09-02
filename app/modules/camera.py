@@ -17,7 +17,6 @@ def _camera_loop():
     cam = cv2.VideoCapture(int(os.environ.get('CAMERA_INDEX', 0)))
     cam.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
     cam.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
-    cam.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'MJPG'))
 
     if not cam.isOpened():
         logger.error("Camera failed to open — check connection and CAMERA_INDEX")
