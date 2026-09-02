@@ -73,19 +73,35 @@
                 <span class="price-note">per session · print + digital included</span>
             </div>
 
-            <button class="btn-primary" onclick="goToPayment()">Press to Pay</button>
+            <button class="btn-primary" onclick="goToCopies()">Press to Pay</button>
         </div>
     </div>
 
-    <!-- SCREEN 3: Payment -->
+    <!-- SCREEN 3: Copies -->
+    <div class="screen" id="screen-copies">
+        <div class="film-border top"></div>
+        <div class="film-border bottom"></div>
+
+        <div class="copies-content">
+            <p class="eyebrow">&#9673; Prints &#9673;</p>
+            <h2 class="headline"><em>How many copies?</em></h2>
+            <p class="subline">First copy included &nbsp;&middot;&nbsp; extras at +£<span id="extra-copy-label"></span> each</p>
+
+            <div class="copies-grid" id="copies-grid"></div>
+
+            <button class="btn-secondary" onclick="goToSteps()">&#8592; Back</button>
+        </div>
+    </div>
+
+    <!-- SCREEN 4: Payment -->
     <div class="screen" id="screen-payment">
         <div class="film-border top"></div>
         <div class="film-border bottom"></div>
 
         <div class="payment-content">
             <p class="eyebrow">&#9673; Payment &#9673;</p>
-            <h2 class="headline"><em>£5</em> per session</h2>
-            <p class="subline">print + digital included</p>
+            <h2 class="headline"><em id="payment-price"></em></h2>
+            <p class="subline" id="payment-copies-label"></p>
 
             <div class="tap-zone" id="tap-zone">
                 <div class="tap-ring"></div>
@@ -102,6 +118,7 @@
             </button>
 
             <button class="btn-secondary" onclick="cancelPayment()">&#8592; Back</button>
+
         </div>
     </div>
 
@@ -186,6 +203,8 @@
         window.PHOTOS_PER_SESSION     = {{ photos_per_session }};
         window.COUNTDOWN_SECS         = {{ countdown_secs }};
         window.PAYMENT_DEV_MODE       = {{ 'true' if payment_dev_mode else 'false' }};
+        window.BASE_PRICE             = {{ base_price }};
+        window.EXTRA_COPY_PRICE       = {{ extra_copy_price }};
     </script>
     <script src="/static/js/app.js"></script>
     <script src="/static/js/inactivity.js"></script>

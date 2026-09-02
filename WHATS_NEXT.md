@@ -34,16 +34,15 @@ A small distraction while the strip is composing (takes a few seconds on Pi). Id
 Pure JS/CSS — no server round-trips, no libraries. Hidden once `img.onload` fires.
 
 ### Granular Dev Mode Flags
-Currently dev mode is all-or-nothing — `sys.platform == "win32"` switches camera and NFC to fake versions simultaneously. Replace this with independent env var toggles so each hardware component can be faked separately:
+Independent env var toggles so each hardware component can be faked separately:
 
 ```
-CAMERA_DEV_MODE=true     # fake frames instead of real camera
+PAYMENT_DEV_MODE=true    # skip Paymob, auto-approve instantly (already built)
 NFC_DEV_MODE=true        # auto-fire a fake card tap every 3s
-PAYMENT_DEV_MODE=true    # skip Paymob, auto-approve instantly
 PRINTER_DEV_MODE=true    # log "would print" instead of sending to CUPS
 ```
 
-This lets you mix and match — e.g. test a new filter with a real camera but fake payment, or test the payment flow with a real NFC reader but fake camera. Build this when you have a second component to test independently (e.g. once the printer is added).
+`PAYMENT_DEV_MODE` is already implemented. Add the others when those components are built.
 
 ---
 
@@ -52,25 +51,20 @@ This lets you mix and match — e.g. test a new filter with a real camera but fa
 Everything in this section needs to be done before the first paying customer.
 
 ### Raspberry Pi Setup
-- [ ] Flash SD card and boot Pi headless
-- [ ] Install Python dependencies (OpenCV, evdev, Pillow, Flask, python-dotenv, qrcode)
-- [ ] Test real camera — adjust `CAMERA_INDEX` in `.env` if needed
+- [x] Flash SD card and boot Pi headless
+- [x] Install Python dependencies (OpenCV, Pillow, Flask, python-dotenv, qrcode)
+- [x] Test real camera — working on USB webcam at `/dev/video0`
+- [x] Remote SSH access via Tailscale (`ssh pbpi-1@100.69.73.14` from anywhere)
 - [ ] Test real NFC reader — confirm `NFC_VENDOR_ID` / `NFC_PRODUCT_ID` match the device
 - [ ] Set up systemd service so Flask auto-starts on boot and restarts on crash
 - [ ] Lock down as a kiosk (disable keyboard shortcuts, auto-login, fullscreen Chromium)
 
-### Remote Access (Cloudflare SSH Tunnel)
-Do this while you still have physical access — after this you can manage the booth from anywhere.
-- [ ] Install `cloudflared` on the Pi
-- [ ] Authenticate with your Cloudflare account (`cloudflared tunnel login`)
-- [ ] Create a tunnel and add an SSH hostname to your Cloudflare DNS
-- [ ] Run the tunnel as a second systemd service alongside Flask
-- [ ] Test SSH access from your laptop over the tunnel
-- [ ] Read `MAINTENANCE.md` — covers the common commands you'll need remotely
-
-> This runs on the same Pi as the booth. No extra hardware needed.
+### Remote Access
+- [x] Tailscale installed on Pi and laptop — SSH works from any network
+- [ ] Cloudflare Tunnel for public URL (needs a domain — do this when buying one)
 
 ### Public URL (QR Codes)
+- [ ] Buy a domain and add it to Cloudflare
 - [ ] Set up Cloudflare Tunnel on Pi
 - [ ] Set `BOOTH_BASE_URL` in `.env` to the public HTTPS tunnel URL
 - [ ] Test that `/strip/{session_id}` is reachable from a phone on any network

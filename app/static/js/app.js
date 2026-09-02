@@ -51,6 +51,11 @@ function goTo(targetId) {
 
 // ── Payment flow ─────────────────────────────────────────
 let paymentController = null;
+let selectedCopies = 1;
+
+function _formatPrice(p) {
+    return p % 1 === 0 ? `£${p}` : `£${p.toFixed(2)}`;
+}
 
 // Inactivity timer is only active on steps and payment — the two screens
 // where a customer can abandon the flow and walk away mid-session.
@@ -61,9 +66,43 @@ function goToSteps() {
     goTo('screen-steps');
 }
 
-function goToPayment() {
-    logEvent('steps → payment');
+function goToCopies() {
+    logEvent('steps → copies');
     inactivity.resume();
+
+    document.getElementById('extra-copy-label').textContent =
+        window.EXTRA_COPY_PRICE % 1 === 0
+            ? window.EXTRA_COPY_PRICE
+            : window.EXTRA_COPY_PRICE.toFixed(2);
+
+    const grid = document.getElementById('copies-grid');
+    grid.innerHTML = '';
+    for (let i = 1; i <= 4; i++) {
+        const price = window.BASE_PRICE + (i - 1) * window.EXTRA_COPY_PRICE;
+        const btn = document.createElement('button');
+        btn.className = 'btn-copies';
+        btn.innerHTML = `<span class="copies-num">${i}</span><span class="copies-price">${_formatPrice(price)}</span>`;
+        btn.onclick = () => selectCopies(i);
+        grid.appendChild(btn);
+    }
+
+    goTo('screen-copies');
+}
+
+function selectCopies(n) {
+    selectedCopies = n;
+    goToPayment();
+}
+
+function goToPayment() {
+    logEvent('copies → payment');
+    inactivity.resume();
+
+    const price = window.BASE_PRICE + (selectedCopies - 1) * window.EXTRA_COPY_PRICE;
+    document.getElementById('payment-price').textContent = _formatPrice(price);
+    document.getElementById('payment-copies-label').textContent =
+        selectedCopies === 1 ? '1 copy · print + digital included' : `${selectedCopies} copies · print + digital included`;
+
     goTo('screen-payment');
     if (window.PAYMENT_DEV_MODE) {
         document.getElementById('dev-pay-btn').style.display = 'block';
@@ -111,8 +150,8 @@ function cancelPayment() {
         paymentController.abort();
         paymentController = null;
     }
-    inactivity.reset();
-    goTo('screen-welcome');
+    inactivity.resume();
+    goTo('screen-copies');
 }
 
 // ── Error handling ───────────────────────────────────────
@@ -308,8 +347,8 @@ function resetBooth() {
     inactivity.pause();
     sessionId        = null;
     visitorId        = null;
-    sessionId        = null;
     photosTaken      = 0;
+    selectedCopies   = 1;
     paymentConfirmed = false;
     capturing        = false;
     stripShown       = false;
