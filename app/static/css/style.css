@@ -542,6 +542,20 @@ html, body {
     margin-top: 4px;
 }
 
+.btn-dev {
+    margin-top: 1.5rem;
+    padding: 0.6rem 1.4rem;
+    background: #b8430a;
+    color: #fff;
+    border: 2px dashed #ff8c42;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.85rem;
+    cursor: pointer;
+    opacity: 0.85;
+}
+.btn-dev:hover { opacity: 1; }
+
 .btn-link {
     background: none;
     border: none;

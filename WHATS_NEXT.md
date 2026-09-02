@@ -16,6 +16,7 @@ Suggested moods:
 - **70s** — warm orange-brown cast, faded blacks
 - **Early 2000s** — slight overexposure, cyan shadows
 - **Gritty** — heavy grain, crushed blacks
+- **High Flash** - High Flash
 
 Implementation lives entirely in `composer.py` (Pillow LUT / colour matrix). The new screen is pure HTML/JS — no backend changes beyond passing the selected mood to `/compose`.
 
@@ -23,19 +24,6 @@ Implementation lives entirely in `composer.py` (Pillow LUT / colour matrix). The
 Swap the strip border, footer branding, and background palette based on the time of year. Could be calendar-driven (auto-switch on dates) or toggled via an env variable for manual control.
 
 Examples: fairy lights + snow for winter, flowers + pastels for spring, warm grain for autumn. Pillow already handles the strip layout — just swap assets and colour tokens in `composer.py`.
-
-### Pose Suggestions
-Display a fun pose prompt above the countdown before each shot. A new suggestion appears for each of the 4 photos so the group has something to react to.
-
-Examples:
-- *"One person points at someone else"*
-- *"Everyone looks shocked"*
-- *"Classic group photo — make it cheesy"*
-- *"Back to back, arms crossed"*
-- *"All lean in like you're sharing a secret"*
-- *"One person photobombs from behind"*
-
-Implementation: add a `#pose-text` element to the camera overlay in `index.html`, a poses array in `app.js`, and pick a random one at the start of each `runCountdown()` call. Pure frontend — no backend changes. Can also shuffle a fixed ordered list so all 4 poses per session feel intentional rather than repetitive.
 
 ### Processing Screen Mini-Game
 A small distraction while the strip is composing (takes a few seconds on Pi). Ideas:

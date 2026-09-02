@@ -62,11 +62,14 @@ function goToSteps() {
 }
 
 function goToPayment() {
-    logEvent('Customer pressed: steps screen → payment screen');
     logEvent('steps → payment');
     inactivity.resume();
     goTo('screen-payment');
-    setTimeout(startPaymentFlow, 700);
+    if (window.PAYMENT_DEV_MODE) {
+        document.getElementById('dev-pay-btn').style.display = 'block';
+    } else {
+        setTimeout(startPaymentFlow, 700);
+    }
 }
 
 async function startPaymentFlow() {
@@ -170,7 +173,10 @@ async function startCameraSession() {
 }
 
 // ── Countdown + capture loop ─────────────────────────────
+let _countdownInterval = null;
+
 function runCountdown() {
+    clearInterval(_countdownInterval); // kill any phantom interval from a previous round
     updateCounter();
     let count = COUNTDOWN_FROM;
 
@@ -182,7 +188,7 @@ function runCountdown() {
 
     showNumber(el, count);
 
-    const interval = setInterval(() => {
+    _countdownInterval = setInterval(() => {
         el.classList.add('shrink');
 
         setTimeout(() => {
@@ -192,7 +198,8 @@ function runCountdown() {
                 clearTransition(el);
             } else {
                 el.classList.remove('show', 'shrink');
-                clearInterval(interval);
+                clearInterval(_countdownInterval);
+                _countdownInterval = null;
                 triggerCapture(smile);
             }
         }, 220);
@@ -293,7 +300,10 @@ function resetBooth() {
         paymentController = null;
     }
     clearInterval(_processingTimer);
+    clearInterval(_countdownInterval);
+    _countdownInterval = null;
     document.getElementById('reset-countdown').style.display = 'none';
+    document.getElementById('dev-pay-btn').style.display = 'none';
     if (sessionId) logEvent(`session reset`);
     inactivity.pause();
     sessionId        = null;

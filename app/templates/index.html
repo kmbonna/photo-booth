@@ -97,6 +97,10 @@
             <p class="tap-label">Tap your card to continue</p>
             <p class="tap-status" id="tap-status"></p>
 
+            <button class="btn-dev" id="dev-pay-btn" style="display:none" onclick="startCameraSession()">
+                &#9654; Approve Payment (Dev)
+            </button>
+
             <button class="btn-secondary" onclick="cancelPayment()">&#8592; Back</button>
         </div>
     </div>
@@ -181,6 +185,7 @@
         window.PROCESSING_RESET_MS    = {{ processing_reset_ms }};
         window.PHOTOS_PER_SESSION     = {{ photos_per_session }};
         window.COUNTDOWN_SECS         = {{ countdown_secs }};
+        window.PAYMENT_DEV_MODE       = {{ 'true' if payment_dev_mode else 'false' }};
     </script>
     <script src="/static/js/app.js"></script>
     <script src="/static/js/inactivity.js"></script>

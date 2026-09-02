@@ -15,7 +15,7 @@ from modules.qr import generate_qr_bytes
 
 logger = log.get('main')
 
-# Suppress werkzeug request-line logs (GET /... 200) — app logs tell the full story.
+# Keep werkzeug at INFO so startup "Running on http://..." lines appear in the terminal.
 logging.getLogger('werkzeug').setLevel(logging.WARNING)
 
 logger.info("booth starting up")
@@ -47,6 +47,7 @@ def index():
         processing_reset_ms   = int(os.environ.get('PROCESSING_RESET_SECS', 60)) * 1000,
         photos_per_session    = int(os.environ.get('PHOTOS_PER_SESSION', 4)),
         countdown_secs        = int(os.environ.get('COUNTDOWN_SECS', 3)),
+        payment_dev_mode      = os.environ.get('PAYMENT_DEV_MODE', 'false').lower() == 'true',
     )
 
 
