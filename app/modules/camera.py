@@ -59,7 +59,9 @@ def start():
 
 def generate_preview():
     start()
+    interval = 1.0 / int(os.environ.get('PREVIEW_FPS', 15))
     while True:
+        t = time.time()
         with _lock:
             frame = _latest_frame.copy() if _latest_frame is not None else None
         if frame is None:
@@ -68,6 +70,9 @@ def generate_preview():
         quality = int(os.environ.get('PREVIEW_JPEG_QUALITY', 75))
         _, buf = cv2.imencode('.jpg', frame, [cv2.IMWRITE_JPEG_QUALITY, quality])
         yield b'--frame\r\nContent-Type: image/jpeg\r\n\r\n' + buf.tobytes() + b'\r\n'
+        elapsed = time.time() - t
+        if elapsed < interval:
+            time.sleep(interval - elapsed)
 
 
 def capture_photo(session_id, photo_number):

@@ -56,8 +56,9 @@ Everything in this section needs to be done before the first paying customer.
 - [x] Test real camera — working on USB webcam at `/dev/video0`
 - [x] Remote SSH access via Tailscale (`ssh pbpi-1@100.69.73.14` from anywhere)
 - [ ] Test real NFC reader — confirm `NFC_VENDOR_ID` / `NFC_PRODUCT_ID` match the device
-- [ ] Set up systemd service so Flask auto-starts on boot and restarts on crash
+- [ ] Set up `kiosk.service` systemd unit — Flask auto-starts on boot, restarts on crash
 - [ ] Lock down as a kiosk (disable keyboard shortcuts, auto-login, fullscreen Chromium)
+- [ ] Add `BOOTH_ID=arkan-001` (or equivalent) to `.env` — needed when central system comes online
 
 ### Remote Access
 - [x] Tailscale installed on Pi and laptop — SSH works from any network
@@ -80,6 +81,50 @@ Everything in this section needs to be done before the first paying customer.
 - [ ] Install CUPS on Pi and add printer
 - [ ] Add `/print/{session_id}` Flask route that sends `strip.jpg` to CUPS
 - [ ] Trigger print automatically after compose, or add a button on the processing screen
+
+---
+
+## Central System
+
+Build this after the local kiosk is stable and live. Don't start here — let real operation tell you what you actually need.
+
+### Phase 1 — Health Monitoring Service (on Pi)
+
+A second process running alongside the kiosk, independent from it. If the kiosk crashes, the health monitor keeps running and reports it.
+
+- [ ] Write `health/health_service.py` — polls camera, printer, internet connectivity every 30–60s
+- [ ] Add `health.service` systemd unit — runs independently of `kiosk.service`
+- [ ] Report payload: `{ booth_id, timestamp, kiosk_running, internet, camera, printer }`
+
+### Phase 2 — Central Backend
+
+A separate repository: `photobooth-central`. Receives data from booths via HTTPS.
+
+- [ ] Create `photobooth-central` repo
+- [ ] `POST /api/v1/health` — receives health check-ins, updates booth status
+- [ ] `POST /api/v1/sessions` — receives session data after each session completes
+- [ ] `POST /api/v1/errors` — receives error reports from kiosk and health monitor
+- [ ] `GET /api/v1/booths` — used by dashboard
+- [ ] PostgreSQL: three tables — `booths`, `sessions`, `errors` (see spec for field details)
+- [ ] Booth authentication — each booth has its own token, stored as env var `CENTRAL_API_TOKEN`
+
+Key sessions fields to start capturing locally now: `number_of_copies`, `price`, `payment_status`, `session_status` — the kiosk will need to send these.
+
+### Phase 3 — Dashboard
+
+Reads from the backend API. Initial version just shows booth status and recent sessions.
+
+- [ ] Booth status panel — online/offline, last seen, camera/printer/internet state
+- [ ] Session list — recent sessions per booth, copies printed, revenue
+- [ ] Error log — recent errors with booth ID, source, message
+- [ ] Polling refresh every 30–60s (no WebSockets needed initially)
+- [ ] Dashboard protected by authentication
+
+### Phase 4 — Deployment Automation
+
+- [ ] Write `scripts/install.sh` — installs dependencies, creates venv, installs systemd units, enables services
+- [ ] Document `BOOTH_ID` and `CENTRAL_API_URL` as the only things that change per booth
+- [ ] Test: flash Pi → connect internet → run `./install.sh` → booth live without manual steps
 
 ---
 

@@ -130,7 +130,7 @@ Common things to adjust remotely:
 ## Deploying a Code Update
 
 ```bash
-cd ~/Photo_Booth
+cd ~/photo-booth
 git pull
 systemctl restart photobooth
 ```
@@ -224,17 +224,17 @@ systemctl status photobooth tailscaled
 systemctl restart photobooth
 
 # Live app log
-tail -f ~/Photo_Booth/logs/photobooth.log
+tail -f ~/photo-booth/logs/photobooth.log
 
 # Live system log
 journalctl -u photobooth -f
 
 # Edit config
-nano ~/Photo_Booth/.env && systemctl restart photobooth
+nano ~/photo-booth/.env && systemctl restart photobooth
 
 # Deploy update
-cd ~/Photo_Booth && git pull && systemctl restart photobooth
+cd ~/photo-booth && git pull && systemctl restart photobooth
 
 # Disk check
-df -h && du -sh ~/Photo_Booth/app/sessions/
+df -h && du -sh ~/photo-booth/app/sessions/
 ```

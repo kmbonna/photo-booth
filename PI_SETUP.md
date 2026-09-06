@@ -33,6 +33,14 @@ The IP in that line is the Pi.
 
 ## Add a New WiFi Network
 
+## see the connections already there:
+
+nmcli con show
+
+## see the password of a network
+
+sudo nmcli con show "NetworkName" | grep psk
+
 SSH into the Pi, then run:
 
 ```bash
