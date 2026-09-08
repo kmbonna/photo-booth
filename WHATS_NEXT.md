@@ -56,7 +56,7 @@ Everything in this section needs to be done before the first paying customer.
 - [x] Test real camera — working on USB webcam at `/dev/video0`
 - [x] Remote SSH access via Tailscale (`ssh pbpi-1@100.69.73.14` from anywhere)
 - [ ] Test real NFC reader — confirm `NFC_VENDOR_ID` / `NFC_PRODUCT_ID` match the device
-- [ ] Set up `kiosk.service` systemd unit — Flask auto-starts on boot, restarts on crash
+- [x] Set up `kiosk.service` systemd unit — Flask auto-starts on boot, restarts on crash
 - [ ] Lock down as a kiosk (disable keyboard shortcuts, auto-login, fullscreen Chromium)
 - [ ] Add `BOOTH_ID=arkan-001` (or equivalent) to `.env` — needed when central system comes online
 

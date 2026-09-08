@@ -54,7 +54,7 @@ let paymentController = null;
 let selectedCopies = 1;
 
 function _formatPrice(p) {
-    return p % 1 === 0 ? `£${p}` : `£${p.toFixed(2)}`;
+    return p % 1 === 0 ? `${p} ${window.CURRENCY}` : `${p.toFixed(2)} ${window.CURRENCY}`;
 }
 
 // Inactivity timer is only active on steps and payment — the two screens
@@ -66,19 +66,16 @@ function goToSteps() {
     goTo('screen-steps');
 }
 
+document.getElementById('steps-price').textContent = _formatPrice(window.PRICES[0]);
+
 function goToCopies() {
     logEvent('steps → copies');
     inactivity.resume();
 
-    document.getElementById('extra-copy-label').textContent =
-        window.EXTRA_COPY_PRICE % 1 === 0
-            ? window.EXTRA_COPY_PRICE
-            : window.EXTRA_COPY_PRICE.toFixed(2);
-
     const grid = document.getElementById('copies-grid');
     grid.innerHTML = '';
-    for (let i = 1; i <= 4; i++) {
-        const price = window.BASE_PRICE + (i - 1) * window.EXTRA_COPY_PRICE;
+    for (let i = 1; i <= window.PRICES.length; i++) {
+        const price = window.PRICES[i - 1];
         const btn = document.createElement('button');
         btn.className = 'btn-copies';
         btn.innerHTML = `<span class="copies-num">${i}</span><span class="copies-price">${_formatPrice(price)}</span>`;
@@ -98,7 +95,7 @@ function goToPayment() {
     logEvent('copies → payment');
     inactivity.resume();
 
-    const price = window.BASE_PRICE + (selectedCopies - 1) * window.EXTRA_COPY_PRICE;
+    const price = window.PRICES[selectedCopies - 1];
     document.getElementById('payment-price').textContent = _formatPrice(price);
     document.getElementById('payment-copies-label').textContent =
         selectedCopies === 1 ? '1 copy · print + digital included' : `${selectedCopies} copies · print + digital included`;

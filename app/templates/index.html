@@ -69,7 +69,7 @@
             </div>
 
             <div class="price-tag">
-                <span class="price-amount">£5</span>
+                <span class="price-amount" id="steps-price"></span>
                 <span class="price-note">per session · print + digital included</span>
             </div>
 
@@ -85,7 +85,7 @@
         <div class="copies-content">
             <p class="eyebrow">&#9673; Prints &#9673;</p>
             <h2 class="headline"><em>How many copies?</em></h2>
-            <p class="subline">First copy included &nbsp;&middot;&nbsp; extras at +£<span id="extra-copy-label"></span> each</p>
+            <p class="subline">Choose how many copies to print</p>
 
             <div class="copies-grid" id="copies-grid"></div>
 
@@ -203,8 +203,8 @@
         window.PHOTOS_PER_SESSION     = {{ photos_per_session }};
         window.COUNTDOWN_SECS         = {{ countdown_secs }};
         window.PAYMENT_DEV_MODE       = {{ 'true' if payment_dev_mode else 'false' }};
-        window.BASE_PRICE             = {{ base_price }};
-        window.EXTRA_COPY_PRICE       = {{ extra_copy_price }};
+        window.CURRENCY               = "{{ currency }}";
+        window.PRICES                 = {{ prices | tojson }};
     </script>
     <script src="/static/js/app.js"></script>
     <script src="/static/js/inactivity.js"></script>

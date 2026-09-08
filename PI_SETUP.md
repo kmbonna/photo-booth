@@ -33,29 +33,24 @@ The IP in that line is the Pi.
 
 ## Add a New WiFi Network
 
-## see the connections already there:
-
+See what's already saved:
+```bash
 nmcli con show
+```
 
-## see the password of a network
-
+See the password of a saved network:
+```bash
 sudo nmcli con show "NetworkName" | grep psk
+```
 
-SSH into the Pi, then run:
-
+Add a new network:
 ```bash
 sudo nmcli con add type wifi ifname wlan0 con-name "NetworkName" ssid "NetworkName" wifi-sec.key-mgmt wpa-psk wifi-sec.psk "password"
 ```
 
-Replace `NetworkName` and `password`. The Pi will connect automatically whenever it's in range.
+Replace `NetworkName` and `password`. The Pi connects automatically whenever it's in range.
 
 ---
-
-## See All Saved WiFi Networks
-
-```bash
-nmcli con show
-```
 
 ---
 
@@ -99,6 +94,54 @@ rm filename          # delete a file
 rm -rf folder-name   # delete a folder and everything in it
 cp file1 file2       # copy a file
 mv file1 file2       # rename or move a file
+```
+
+---
+
+## Managing the Photobooth Service
+
+The app runs as a systemd service called `photobooth`. It starts automatically on boot and restarts itself if it crashes.
+
+**Check if it's running:**
+```bash
+systemctl status photobooth
+```
+
+**Stop it** (e.g. before pulling a code update):
+```bash
+systemctl stop photobooth
+```
+
+**Start it again:**
+```bash
+systemctl start photobooth
+```
+
+**Restart it** (after a code change or `.env` edit):
+```bash
+systemctl restart photobooth
+```
+
+**Disable auto-start** (if you want it to stay off after a reboot):
+```bash
+sudo systemctl disable photobooth
+```
+
+**Re-enable auto-start:**
+```bash
+sudo systemctl enable photobooth
+```
+
+**Deploy a code update cleanly:**
+```bash
+systemctl stop photobooth
+cd ~/photo-booth && git pull
+systemctl start photobooth
+```
+
+**View live logs:**
+```bash
+journalctl -u photobooth -f
 ```
 
 ---

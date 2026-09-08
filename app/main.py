@@ -48,8 +48,13 @@ def index():
         photos_per_session    = int(os.environ.get('PHOTOS_PER_SESSION', 4)),
         countdown_secs        = int(os.environ.get('COUNTDOWN_SECS', 3)),
         payment_dev_mode      = os.environ.get('PAYMENT_DEV_MODE', 'false').lower() == 'true',
-        base_price            = float(os.environ.get('BASE_PRICE', 5)),
-        extra_copy_price      = float(os.environ.get('EXTRA_COPY_PRICE', 0.50)),
+        currency              = os.environ.get('CURRENCY', 'EGP'),
+        prices                = [
+            float(os.environ.get('PRICE_1', 150)),
+            float(os.environ.get('PRICE_2', 190)),
+            float(os.environ.get('PRICE_3', 220)),
+            float(os.environ.get('PRICE_4', 240)),
+        ],
     )
 
 
