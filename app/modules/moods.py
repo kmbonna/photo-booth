@@ -15,7 +15,7 @@ def _apply_70s(img):
     g = g.point(lambda x: min(255, int(x * 1.02 + 8)))
     b = b.point(lambda x: min(255, int(x * 0.78 + 12)))
     img = Image.merge('RGB', (r, g, b))
-    img = ImageEnhance.Saturation(img).enhance(0.8)
+    img = ImageEnhance.Color(img).enhance(0.8)
     img = ImageEnhance.Contrast(img).enhance(0.88)
     return img
 
