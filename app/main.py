@@ -124,9 +124,10 @@ def capture(session_id, photo_num):
 @app.route('/compose/<session_id>')
 def compose_strip(session_id):
     ctx = _ctx(session=session_id)
-    logger.info("composing strip", extra=ctx)
+    mood = request.args.get('mood', 'default')
+    logger.info("composing strip mood=%s", mood, extra=ctx)
     try:
-        compose(session_id)
+        compose(session_id, mood)
         logger.info("strip done", extra=ctx)
         return jsonify({'status': 'ok'})
     except FileNotFoundError as e:

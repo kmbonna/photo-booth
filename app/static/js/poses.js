@@ -1,6 +1,7 @@
 const POSES = [
     "Act natural — impossible",
-    "Maybe Smile?",
+    "How about a Smile?",
+    "Strike your Model Pose",
     "Freeze mid-laugh",
     "Best villain pose",
     "Look away dramatically",
@@ -13,7 +14,6 @@ const POSES = [
     "Pretend you're plotting something",
     "Candid moment — fake it",
     "Act like you just won something",
-    "Best impression of someone cool",
     "Pretend you don't know each other",
     "Everyone copy someone else",
     "Point at the camera",

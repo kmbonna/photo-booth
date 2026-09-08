@@ -122,7 +122,38 @@
         </div>
     </div>
 
-    <!-- SCREEN 4: Camera + Countdown -->
+    <!-- SCREEN 4: Mood / Filter Selection -->
+    <div class="screen" id="screen-mood">
+        <div class="film-border top"></div>
+        <div class="film-border bottom"></div>
+
+        <div class="mood-content">
+            <p class="eyebrow">&#9673; Choose Your Look &#9673;</p>
+            <h2 class="headline"><em>Pick a filter</em></h2>
+
+            <div class="mood-grid">
+                <button class="btn-mood" onclick="selectMood('default')">
+                    <div class="mood-swatch swatch-default"></div>
+                    <span class="mood-name">Default</span>
+                    <span class="mood-desc">Natural &amp; clean</span>
+                </button>
+                <button class="btn-mood" onclick="selectMood('noir')">
+                    <div class="mood-swatch swatch-noir"></div>
+                    <span class="mood-name">Noir</span>
+                    <span class="mood-desc">Black &amp; white, high contrast</span>
+                </button>
+                <button class="btn-mood" onclick="selectMood('70s')">
+                    <div class="mood-swatch swatch-70s"></div>
+                    <span class="mood-name">70s</span>
+                    <span class="mood-desc">Warm, faded &amp; golden</span>
+                </button>
+            </div>
+
+            <button class="btn-secondary" onclick="cancelPayment()">&#8592; Back</button>
+        </div>
+    </div>
+
+    <!-- SCREEN 5: Camera + Countdown -->
     <div class="screen" id="screen-camera">
         <div class="flash" id="flash"></div>
 

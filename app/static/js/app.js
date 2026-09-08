@@ -52,6 +52,7 @@ function goTo(targetId) {
 // ── Payment flow ─────────────────────────────────────────
 let paymentController = null;
 let selectedCopies = 1;
+let selectedMood = 'default';
 
 function _formatPrice(p) {
     return p % 1 === 0 ? `${p} ${window.CURRENCY}` : `${p.toFixed(2)} ${window.CURRENCY}`;
@@ -88,11 +89,22 @@ function goToCopies() {
 
 function selectCopies(n) {
     selectedCopies = n;
+    goToMood();
+}
+
+function goToMood() {
+    logEvent('copies → mood');
+    inactivity.resume();
+    goTo('screen-mood');
+}
+
+function selectMood(mood) {
+    selectedMood = mood;
     goToPayment();
 }
 
 function goToPayment() {
-    logEvent('copies → payment');
+    logEvent('mood → payment');
     inactivity.resume();
 
     const price = window.PRICES[selectedCopies - 1];
@@ -148,7 +160,7 @@ function cancelPayment() {
         paymentController = null;
     }
     inactivity.resume();
-    goTo('screen-copies');
+    goTo('screen-mood');
 }
 
 // ── Error handling ───────────────────────────────────────
@@ -316,7 +328,7 @@ async function showStrip() {
 
     // Ask server to compose the strip
     try {
-        const res = await fetch(`/compose/${sessionId}?visitor_id=${visitorId || '-'}`);
+        const res = await fetch(`/compose/${sessionId}?mood=${selectedMood}&visitor_id=${visitorId || '-'}`);
         if (!res.ok) throw new Error('Compose failed');
 
         img.onload = () => {
@@ -352,6 +364,7 @@ function resetBooth() {
     visitorId        = null;
     photosTaken      = 0;
     selectedCopies   = 1;
+    selectedMood     = 'default';
     paymentConfirmed = false;
     capturing        = false;
     stripShown       = false;

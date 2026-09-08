@@ -104,22 +104,22 @@ The app runs as a systemd service called `photobooth`. It starts automatically o
 
 **Check if it's running:**
 ```bash
-systemctl status photobooth
+sudo systemctl status photobooth
 ```
 
 **Stop it** (e.g. before pulling a code update):
 ```bash
-systemctl stop photobooth
+sudo systemctl stop photobooth
 ```
 
 **Start it again:**
 ```bash
-systemctl start photobooth
+sudo systemctl start photobooth
 ```
 
 **Restart it** (after a code change or `.env` edit):
 ```bash
-systemctl restart photobooth
+sudo systemctl restart photobooth
 ```
 
 **Disable auto-start** (if you want it to stay off after a reboot):
@@ -134,9 +134,9 @@ sudo systemctl enable photobooth
 
 **Deploy a code update cleanly:**
 ```bash
-systemctl stop photobooth
+sudo systemctl stop photobooth
 cd ~/photo-booth && git pull
-systemctl start photobooth
+sudo systemctl start photobooth
 ```
 
 **View live logs:**

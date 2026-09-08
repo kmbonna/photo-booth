@@ -2,7 +2,7 @@ import os
 from datetime import datetime
 from PIL import Image, ImageDraw, ImageFont
 
-from modules import log
+from modules import moods, log
 logger = log.get(__name__)
 
 # Strip canvas
@@ -50,7 +50,7 @@ def _crop_center(img, tw, th):
     return img.resize((tw, th), Image.LANCZOS)
 
 
-def compose(session_id):
+def compose(session_id, mood='default'):
     """Build the 4-photo strip and save it as strip.jpg in the session folder."""
     base = os.environ.get('SESSIONS_DIR') or os.path.join(os.path.dirname(__file__), '..', 'sessions')
     session_dir = os.path.normpath(os.path.join(base, session_id))
@@ -60,7 +60,8 @@ def compose(session_id):
         path = os.path.join(session_dir, f'photo_{i}.jpg')
         if not os.path.exists(path):
             raise FileNotFoundError(f"photo_{i}.jpg missing for session {session_id}")
-        photos.append(_crop_center(Image.open(path).convert('RGB'), PHOTO_W, PHOTO_H))
+        img = _crop_center(Image.open(path).convert('RGB'), PHOTO_W, PHOTO_H)
+        photos.append(moods.apply(img, mood))
 
     strip = Image.new('RGB', (STRIP_W, STRIP_H), BG)
     draw  = ImageDraw.Draw(strip)

@@ -489,13 +489,19 @@ html, body {
 }
 
 .pose-suggestion {
-    font-family: var(--body);
-    font-size: 1.1rem;
+    position: absolute;
+    bottom: 4rem;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-family: var(--serif);
+    font-size: 2rem;
     font-style: italic;
-    color: rgba(255,255,255,0.6);
-    text-shadow: 0 1px 8px rgba(0,0,0,0.4);
-    margin-top: 0.6rem;
-    min-height: 1.6rem;
+    font-weight: 700;
+    color: rgba(255,255,255,0.95);
+    text-shadow: 0 2px 20px rgba(0,0,0,0.7);
+    letter-spacing: 0.01em;
+    pointer-events: none;
 }
 
 /* ── Processing / Strip Screen ──────────────────────────── */
@@ -567,6 +573,67 @@ html, body {
 .btn-dev:hover { opacity: 1; }
 
 /* ── Copies screen ───────────────────────────────────────── */
+/* ── Mood screen ────────────────────────────────────────── */
+.mood-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    gap: 1.2rem;
+    padding: 2rem;
+    text-align: center;
+}
+
+.mood-grid {
+    display: flex;
+    gap: 1.4rem;
+    margin: 1rem 0;
+}
+
+.btn-mood {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+    background: var(--bg-card);
+    border: 2px solid var(--brown-light);
+    border-radius: 8px;
+    cursor: pointer;
+    padding: 0 1rem 1.2rem;
+    width: 160px;
+    transition: border-color 0.15s, background 0.15s;
+}
+
+.btn-mood:hover { border-color: var(--accent); background: var(--bg); }
+
+.mood-swatch {
+    width: 100%;
+    height: 110px;
+    border-radius: 6px 6px 0 0;
+    margin: 0 -1rem;
+    width: calc(100% + 2rem);
+}
+
+.swatch-default { background: linear-gradient(135deg, #c8b89a 0%, #a0907a 100%); }
+.swatch-noir    { background: linear-gradient(135deg, #555 0%, #111 100%); }
+.swatch-70s     { background: linear-gradient(135deg, #d4955a 0%, #b07340 100%); }
+
+.mood-name {
+    font-family: var(--serif);
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--brown);
+}
+
+.mood-desc {
+    font-family: var(--body);
+    font-size: 0.85rem;
+    color: var(--brown-mid);
+    font-style: italic;
+}
+
+/* ── Copies screen ──────────────────────────────────────── */
 .copies-content {
     display: flex;
     flex-direction: column;
