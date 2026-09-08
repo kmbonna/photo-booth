@@ -1,3 +1,5 @@
+import glob
+import subprocess
 import cv2
 import numpy as np
 import os
@@ -11,6 +13,27 @@ _latest_frame = None
 _running = False
 _lock = threading.Lock()
 _thread = None
+
+
+def _resolve_camera_index():
+    """Find camera by USB vendor/product ID, fall back to CAMERA_INDEX env var."""
+    vendor  = os.environ.get('CAMERA_VENDOR_ID', '').lower()
+    product = os.environ.get('CAMERA_PRODUCT_ID', '').lower()
+
+    if vendor and product:
+        for dev in sorted(glob.glob('/dev/video*')):
+            try:
+                out = subprocess.check_output(
+                    ['udevadm', 'info', f'--name={dev}'], text=True, stderr=subprocess.DEVNULL)
+                if vendor in out and product in out:
+                    idx = int(''.join(filter(str.isdigit, dev.replace('/dev/video', ''))))
+                    logger.info("Camera found at %s (vendor=%s product=%s)", dev, vendor, product)
+                    return idx
+            except Exception:
+                continue
+        logger.warning("Camera not found by USB ID — falling back to CAMERA_INDEX")
+
+    return int(os.environ.get('CAMERA_INDEX', 0))
 
 
 def _placeholder_loop():
@@ -33,44 +56,45 @@ def _camera_loop():
         _placeholder_loop()
         return
 
-    idx = os.environ.get('CAMERA_INDEX', '0')
-    if idx.startswith('/'):
-        # resolve symlink like /dev/webcam → /dev/video1 → index 1
-        real = os.path.realpath(idx)
-        idx = int(''.join(filter(str.isdigit, os.path.basename(real))))
-    else:
-        idx = int(idx)
-    cam = cv2.VideoCapture(idx, cv2.CAP_V4L2)
-    cam.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'MJPG'))
-    cam.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
-    cam.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
-
-    if not cam.isOpened():
-        logger.error("Camera failed to open — check connection and CAMERA_INDEX")
-        _running = False
-        return
-
-    logger.info("Camera opened successfully")
-    for _ in range(30):  # flush stale frames on startup
-        cam.read()
-
-    consecutive_failures = 0
     while _running:
-        ret, frame = cam.read()
-        if ret:
-            consecutive_failures = 0
-            with _lock:
-                _latest_frame = cv2.flip(frame, 1)
-        else:
-            consecutive_failures += 1
-            if consecutive_failures == 10:
-                logger.warning("Camera: 10 consecutive read failures")
-            elif consecutive_failures == 50:
-                logger.error("Camera: 50 consecutive read failures — may be disconnected")
-            time.sleep(0.05)
+        idx = _resolve_camera_index()
+        cam = cv2.VideoCapture(idx, cv2.CAP_V4L2)
+        cam.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'MJPG'))
+        cam.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+        cam.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
 
-    cam.release()
-    logger.info("Camera released")
+        if not cam.isOpened():
+            logger.warning("Camera failed to open at index %d — retrying in 5s", idx)
+            cam.release()
+            time.sleep(5)
+            continue
+
+        logger.info("Camera opened at index %d", idx)
+        for _ in range(30):  # flush stale frames on startup
+            cam.read()
+
+        consecutive_failures = 0
+        while _running:
+            ret, frame = cam.read()
+            if ret:
+                consecutive_failures = 0
+                with _lock:
+                    _latest_frame = cv2.flip(frame, 1)
+            else:
+                consecutive_failures += 1
+                if consecutive_failures == 10:
+                    logger.warning("Camera: 10 consecutive read failures")
+                elif consecutive_failures >= 50:
+                    logger.error("Camera: 50 consecutive failures — releasing and re-scanning")
+                    break
+                time.sleep(0.05)
+
+        cam.release()
+        if _running:
+            logger.info("Camera released — attempting recovery in 3s")
+            time.sleep(3)
+
+    logger.info("Camera thread stopped")
 
 
 def start():

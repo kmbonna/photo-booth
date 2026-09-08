@@ -115,7 +115,7 @@ SESSIONS_DIR=
 LOGS_DIR=
 
 # Camera
-CAMERA_INDEX=/dev/webcam
+CAMERA_INDEX=0
 PREVIEW_JPEG_QUALITY=75
 PREVIEW_FPS=15
 STRIP_JPEG_QUALITY=92
@@ -142,42 +142,21 @@ PYTHONUNBUFFERED=1
 
 ---
 
-## 9. Fix Webcam Device Path
+## 9. Find Webcam USB IDs
 
-Without this, the webcam index can change every time it reconnects or the Pi reboots. This gives it a permanent name `/dev/webcam`.
+The app auto-detects the webcam by USB vendor/product ID so the index never matters. Find your webcam's IDs:
 
-First find the webcam's USB IDs:
 ```bash
 lsusb
 ```
 
-Look for the webcam line — e.g. `ID 4c4a:4a55 Jieli Technology`. The two values around `:` are the vendor ID and product ID.
-
-Create the udev rule:
-```bash
-sudo nano /etc/udev/rules.d/99-webcam.rules
+Look for the webcam line — e.g. `ID 4c4a:4a55 Jieli Technology`. Set in `.env`:
+```
+CAMERA_VENDOR_ID=4c4a
+CAMERA_PRODUCT_ID=4a55
 ```
 
-Paste (replacing the IDs if your webcam is different):
-```
-SUBSYSTEM=="video4linux", ATTRS{idVendor}=="4c4a", ATTRS{idProduct}=="4a55", SYMLINK+="webcam"
-```
-
-Reload:
-```bash
-sudo udevadm control --reload-rules
-sudo udevadm trigger
-```
-
-Verify:
-```bash
-ls -la /dev/webcam
-```
-
-Then set in `.env`:
-```
-CAMERA_INDEX=/dev/webcam
-```
+If using a different webcam model, replace with its IDs. Leave `CAMERA_INDEX=0` as fallback.
 
 ---
 
