@@ -141,6 +141,11 @@ def capture_photo(session_id, photo_number):
     return path
 
 
+def is_ready():
+    with _lock:
+        return _latest_frame is not None
+
+
 def stop():
     global _running
     _running = False

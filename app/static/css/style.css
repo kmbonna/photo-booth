@@ -114,6 +114,16 @@ html, body {
 }
 
 /* ── Welcome Screen ─────────────────────────────────────── */
+.oos-message {
+    font-family: var(--body);
+    font-size: 0.85rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    opacity: 0.75;
+    margin-top: 8px;
+}
+
 .welcome-content {
     text-align: center;
     display: flex;

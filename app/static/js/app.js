@@ -1,3 +1,19 @@
+// ── Camera readiness polling ─────────────────────────────
+function _setCameraReady(ready) {
+    document.getElementById('welcome-start-btn').style.display = ready ? '' : 'none';
+    document.getElementById('welcome-oos').style.display       = ready ? 'none' : 'block';
+}
+
+function _checkCamera() {
+    fetch('/camera/ready')
+        .then(r => r.json())
+        .then(d => _setCameraReady(d.ready))
+        .catch(() => _setCameraReady(false));
+}
+
+_checkCamera();
+setInterval(_checkCamera, 5000);
+
 // ── Processing screen countdown ──────────────────────────
 let _processingTimer = null;
 
@@ -207,9 +223,29 @@ let _poseIndex = 0;
 const TOTAL_PHOTOS   = window.PHOTOS_PER_SESSION || 4;
 const COUNTDOWN_FROM = window.COUNTDOWN_SECS     || 3;
 
+async function _waitForCamera(maxWaitMs) {
+    const deadline = Date.now() + maxWaitMs;
+    while (Date.now() < deadline) {
+        try {
+            const res = await fetch('/camera/ready');
+            const d   = await res.json();
+            if (d.ready) return true;
+        } catch (_) {}
+        await new Promise(r => setTimeout(r, 1000));
+    }
+    return false;
+}
+
 async function startCameraSession() {
     paymentConfirmed = true; // payment just cleared — errors from here are post-payment
     inactivity.pause(); // camera countdown is automated — no user interaction expected
+
+    const ready = await _waitForCamera(10000);
+    if (!ready) {
+        showError('Camera not ready', 'The camera is not responding. Please note your session ID below and try again shortly.');
+        return;
+    }
+
     try {
         const res  = await fetch(`/new_session?visitor_id=${visitorId || '-'}`);
         const data = await res.json();
@@ -220,7 +256,7 @@ async function startCameraSession() {
         goTo('screen-camera');
         setTimeout(runCountdown, 700);
     } catch (e) {
-        showError('Connection error', 'Could not start your session. Please contact staff.');
+        showError('Connection error', 'Could not start your session. Please try again.');
     }
 }
 

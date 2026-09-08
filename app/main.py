@@ -9,7 +9,7 @@ from werkzeug.exceptions import HTTPException
 load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
 
 from modules import log, reader
-from modules.camera import capture_photo, generate_preview
+from modules.camera import capture_photo, generate_preview, is_ready
 from modules.composer import compose
 from modules.qr import generate_qr_bytes
 
@@ -69,6 +69,14 @@ def log_ui_event():
     session = data.get('session_id', '-')
     logger.info(event, extra={'visitor': visitor, 'session': session})
     return jsonify({'ok': True})
+
+
+# ── GET /camera/ready
+# Returns whether the camera has produced at least one frame.
+# → app.js  _checkCamera()
+@app.route('/camera/ready')
+def camera_ready():
+    return jsonify({'ready': is_ready()})
 
 
 # ── GET /preview
