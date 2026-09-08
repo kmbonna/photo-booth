@@ -10,14 +10,15 @@ def _apply_noir(img):
 
 def _apply_70s(img):
     r, g, b = img.split()
-    # heavy warm cast: push red, shift green olive, crush blue, lift all blacks
-    r = r.point(lambda x: min(255, int(x * 1.18 + 30)))
-    g = g.point(lambda x: min(255, int(x * 0.98 + 18)))
-    b = b.point(lambda x: min(255, int(x * 0.62 + 20)))
+    # heavy warm cast matching Kodachrome/Polaroid reference:
+    # blown orange highlights, crushed blues, lifted blacks throughout
+    r = r.point(lambda x: min(255, int(x * 1.22 + 38)))
+    g = g.point(lambda x: min(255, int(x * 0.95 + 22)))
+    b = b.point(lambda x: min(255, int(x * 0.52 + 28)))
     img = Image.merge('RGB', (r, g, b))
-    img = ImageEnhance.Color(img).enhance(1.1)     # keep reds/oranges punchy
-    img = ImageEnhance.Contrast(img).enhance(0.82) # overall softness/haze
-    img = ImageEnhance.Brightness(img).enhance(0.95)
+    img = ImageEnhance.Color(img).enhance(1.05)    # keep reds/oranges punchy
+    img = ImageEnhance.Contrast(img).enhance(0.76) # hazy, soft — no punchy blacks
+    img = ImageEnhance.Brightness(img).enhance(0.93)
     return img
 
 
