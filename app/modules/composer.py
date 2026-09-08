@@ -74,9 +74,29 @@ def compose(session_id, mood='default'):
     y  = TOP_PAD
 
     for photo in photos:
-        draw.rectangle([mx - 2, y - 2, mx + PHOTO_W + 1, y + PHOTO_H + 1],
-                        outline=ACCENT, width=2)
-        strip.paste(photo, (mx, y))
+        if mood == '70s':
+            # Each photo looks like a developed print laid on aged paper:
+            # warm shadow offset down-right, then white border, photo inside.
+            _BORDER = 10
+            _SHADOW = 6
+            _SHADOW_COLOR = (160, 125, 75)
+            draw.rectangle(
+                [mx + _SHADOW, y + _SHADOW, mx + PHOTO_W + _SHADOW, y + PHOTO_H + _SHADOW],
+                fill=_SHADOW_COLOR)
+            draw.rectangle([mx, y, mx + PHOTO_W, y + PHOTO_H], fill=(255, 255, 255))
+            inner = photo.resize((PHOTO_W - _BORDER * 2, PHOTO_H - _BORDER * 2), Image.LANCZOS)
+            strip.paste(inner, (mx + _BORDER, y + _BORDER))
+        elif mood == 'noir':
+            # Contact sheet: thin white frame, no fill
+            draw.rectangle([mx - 3, y - 3, mx + PHOTO_W + 3, y + PHOTO_H + 3],
+                           outline=(60, 60, 60), width=3)
+            draw.rectangle([mx - 1, y - 1, mx + PHOTO_W + 1, y + PHOTO_H + 1],
+                           outline=(220, 220, 220), width=1)
+            strip.paste(photo, (mx, y))
+        else:
+            draw.rectangle([mx - 2, y - 2, mx + PHOTO_W + 1, y + PHOTO_H + 1],
+                           outline=ACCENT, width=2)
+            strip.paste(photo, (mx, y))
         y += PHOTO_H + GAP
 
     # Branding footer
