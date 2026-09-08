@@ -1,4 +1,5 @@
 import cv2
+import numpy as np
 import os
 import threading
 import time
@@ -12,8 +13,26 @@ _lock = threading.Lock()
 _thread = None
 
 
+def _placeholder_loop():
+    global _latest_frame
+    logger.warning("Windows detected — camera disabled, serving placeholder frames")
+    placeholder = np.zeros((720, 1280, 3), dtype=np.uint8)
+    placeholder[:] = (30, 30, 30)
+    cv2.putText(placeholder, 'NO CAMERA', (480, 360),
+                cv2.FONT_HERSHEY_SIMPLEX, 3, (80, 80, 80), 4)
+    while _running:
+        with _lock:
+            _latest_frame = placeholder
+        time.sleep(0.1)
+
+
 def _camera_loop():
     global _latest_frame, _running
+
+    if os.name == 'nt':
+        _placeholder_loop()
+        return
+
     cam = cv2.VideoCapture(int(os.environ.get('CAMERA_INDEX', 0)), cv2.CAP_V4L2)
     cam.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'MJPG'))
     cam.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
