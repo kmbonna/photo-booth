@@ -33,7 +33,8 @@ def _camera_loop():
         _placeholder_loop()
         return
 
-    cam = cv2.VideoCapture(int(os.environ.get('CAMERA_INDEX', 0)), cv2.CAP_V4L2)
+    idx = os.environ.get('CAMERA_INDEX', '0')
+    cam = cv2.VideoCapture(idx if idx.startswith('/') else int(idx), cv2.CAP_V4L2)
     cam.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'MJPG'))
     cam.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
     cam.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)

@@ -115,7 +115,7 @@ SESSIONS_DIR=
 LOGS_DIR=
 
 # Camera
-CAMERA_INDEX=1
+CAMERA_INDEX=/dev/webcam
 PREVIEW_JPEG_QUALITY=75
 PREVIEW_FPS=15
 STRIP_JPEG_QUALITY=92
@@ -142,7 +142,46 @@ PYTHONUNBUFFERED=1
 
 ---
 
-## 9. Create the systemd Service
+## 9. Fix Webcam Device Path
+
+Without this, the webcam index can change every time it reconnects or the Pi reboots. This gives it a permanent name `/dev/webcam`.
+
+First find the webcam's USB IDs:
+```bash
+lsusb
+```
+
+Look for the webcam line — e.g. `ID 4c4a:4a55 Jieli Technology`. The two values around `:` are the vendor ID and product ID.
+
+Create the udev rule:
+```bash
+sudo nano /etc/udev/rules.d/99-webcam.rules
+```
+
+Paste (replacing the IDs if your webcam is different):
+```
+SUBSYSTEM=="video4linux", ATTRS{idVendor}=="4c4a", ATTRS{idProduct}=="4a55", SYMLINK+="webcam"
+```
+
+Reload:
+```bash
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+```
+
+Verify:
+```bash
+ls -la /dev/webcam
+```
+
+Then set in `.env`:
+```
+CAMERA_INDEX=/dev/webcam
+```
+
+---
+
+## 11. Create the systemd Service
 
 ```bash
 sudo nano /etc/systemd/system/photobooth.service
@@ -178,7 +217,7 @@ You should see `Active: active (running)`.
 
 ---
 
-## 10. Verify
+## 12. Verify
 
 Open a browser on your laptop and go to:
 ```
