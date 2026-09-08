@@ -34,7 +34,13 @@ def _camera_loop():
         return
 
     idx = os.environ.get('CAMERA_INDEX', '0')
-    cam = cv2.VideoCapture(idx if idx.startswith('/') else int(idx), cv2.CAP_V4L2)
+    if idx.startswith('/'):
+        # resolve symlink like /dev/webcam → /dev/video1 → index 1
+        real = os.path.realpath(idx)
+        idx = int(''.join(filter(str.isdigit, os.path.basename(real))))
+    else:
+        idx = int(idx)
+    cam = cv2.VideoCapture(idx, cv2.CAP_V4L2)
     cam.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'MJPG'))
     cam.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
     cam.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
