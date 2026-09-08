@@ -16,10 +16,12 @@ BOT_PAD  = 30
 
 STRIP_H = TOP_PAD + 4 * PHOTO_H + 3 * GAP + BOTTOM_H + BOT_PAD
 
-# Colours — matches app CSS variables
-BG      = (247, 240, 227)   # --bg
-ACCENT  = (160, 82,  45)    # --accent
-BROWN   = (59,  42,  26)    # --brown
+# Per-mood strip palettes: (background, frame/accent, text)
+_PALETTES = {
+    'default': ((247, 240, 227), (160,  82,  45), ( 59,  42,  26)),
+    'noir':    (( 18,  18,  18), (200, 200, 200), (220, 220, 220)),
+    '70s':     ((228, 195, 140), (185,  95,  35), ( 75,  40,  10)),
+}
 
 
 def _font(size, bold=False):
@@ -55,6 +57,8 @@ def compose(session_id, mood='default'):
     base = os.environ.get('SESSIONS_DIR') or os.path.join(os.path.dirname(__file__), '..', 'sessions')
     session_dir = os.path.normpath(os.path.join(base, session_id))
 
+    BG, ACCENT, TEXT = _PALETTES.get(mood, _PALETTES['default'])
+
     photos = []
     for i in range(1, 5):
         path = os.path.join(session_dir, f'photo_{i}.jpg')
@@ -70,7 +74,6 @@ def compose(session_id, mood='default'):
     y  = TOP_PAD
 
     for photo in photos:
-        # Thin accent frame
         draw.rectangle([mx - 2, y - 2, mx + PHOTO_W + 1, y + PHOTO_H + 1],
                         outline=ACCENT, width=2)
         strip.paste(photo, (mx, y))
@@ -83,9 +86,9 @@ def compose(session_id, mood='default'):
     f_title = _font(22, bold=True)
     f_date  = _font(15)
     draw.text((STRIP_W // 2, line_y + 14), 'photobooth',
-              font=f_title, fill=BROWN,   anchor='mt')
+              font=f_title, fill=TEXT,   anchor='mt')
     draw.text((STRIP_W // 2, line_y + 46), datetime.now().strftime('%d %b %Y'),
-              font=f_date,  fill=ACCENT,  anchor='mt')
+              font=f_date,  fill=ACCENT, anchor='mt')
 
     out = os.path.join(session_dir, 'strip.jpg')
     strip.save(out, 'JPEG', quality=int(os.environ.get('STRIP_JPEG_QUALITY', 92)))

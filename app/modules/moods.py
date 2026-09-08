@@ -10,13 +10,14 @@ def _apply_noir(img):
 
 def _apply_70s(img):
     r, g, b = img.split()
-    # lift shadows (fade blacks), warm cast: boost red, pull back blue
-    r = r.point(lambda x: min(255, int(x * 1.12 + 18)))
-    g = g.point(lambda x: min(255, int(x * 1.02 + 8)))
-    b = b.point(lambda x: min(255, int(x * 0.78 + 12)))
+    # heavy warm cast: push red, shift green olive, crush blue, lift all blacks
+    r = r.point(lambda x: min(255, int(x * 1.18 + 30)))
+    g = g.point(lambda x: min(255, int(x * 0.98 + 18)))
+    b = b.point(lambda x: min(255, int(x * 0.62 + 20)))
     img = Image.merge('RGB', (r, g, b))
-    img = ImageEnhance.Color(img).enhance(0.8)
-    img = ImageEnhance.Contrast(img).enhance(0.88)
+    img = ImageEnhance.Color(img).enhance(1.1)     # keep reds/oranges punchy
+    img = ImageEnhance.Contrast(img).enhance(0.82) # overall softness/haze
+    img = ImageEnhance.Brightness(img).enhance(0.95)
     return img
 
 
