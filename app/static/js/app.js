@@ -190,6 +190,8 @@ let sessionId = null;
 let photosTaken = 0;
 let capturing = false;  // guard against double-firing countdown
 let stripShown = false; // guard against double compose
+let _poseQueue = [];
+let _poseIndex = 0;
 const TOTAL_PHOTOS   = window.PHOTOS_PER_SESSION || 4;
 const COUNTDOWN_FROM = window.COUNTDOWN_SECS     || 3;
 
@@ -201,6 +203,8 @@ async function startCameraSession() {
         const data = await res.json();
         sessionId   = data.session_id;
         photosTaken = 0;
+        _poseQueue  = [...POSES].sort(() => Math.random() - 0.5);
+        _poseIndex  = 0;
         goTo('screen-camera');
         setTimeout(runCountdown, 700);
     } catch (e) {
@@ -216,11 +220,13 @@ function runCountdown() {
     updateCounter();
     let count = COUNTDOWN_FROM;
 
-    const el = document.getElementById('countdown');
-    const smile = document.getElementById('smile-text');
+    const el              = document.getElementById('countdown');
+    const captureFeedback = document.getElementById('capture-feedback');
+    const pose            = document.getElementById('pose-suggestion');
 
-    smile.textContent = '';
-    smile.classList.remove('show');
+    captureFeedback.textContent = '';
+    captureFeedback.classList.remove('show');
+    pose.textContent = _poseQueue[_poseIndex++] || '';
 
     showNumber(el, count);
 
@@ -236,7 +242,7 @@ function runCountdown() {
                 el.classList.remove('show', 'shrink');
                 clearInterval(_countdownInterval);
                 _countdownInterval = null;
-                triggerCapture(smile);
+                triggerCapture(captureFeedback);
             }
         }, 220);
 
@@ -257,12 +263,12 @@ function clearTransition(el) {
 }
 
 // ── Take the photo ───────────────────────────────────────
-async function triggerCapture(smileEl) {
+async function triggerCapture(captureFeedbackEl) {
     if (capturing) return;
     capturing = true;
     triggerFlash();
-    smileEl.textContent = 'Got it!';
-    smileEl.classList.add('show');
+    captureFeedbackEl.textContent = 'Got it!';
+    captureFeedbackEl.classList.add('show');
 
     // Retry up to 3 times — camera may momentarily drop a frame
     let success = false;
@@ -286,7 +292,7 @@ async function triggerCapture(smileEl) {
 
     if (photosTaken < TOTAL_PHOTOS) {
         setTimeout(() => {
-            smileEl.classList.remove('show');
+            captureFeedbackEl.classList.remove('show');
             setTimeout(runCountdown, 400);
         }, 1200);
     } else {
@@ -349,6 +355,8 @@ function resetBooth() {
     paymentConfirmed = false;
     capturing        = false;
     stripShown       = false;
+    _poseQueue       = [];
+    _poseIndex       = 0;
     const img = document.getElementById('strip-img');
     img.src = '';
     img.classList.remove('loaded');

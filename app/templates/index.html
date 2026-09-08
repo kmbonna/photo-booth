@@ -140,7 +140,8 @@
             <div class="camera-overlay">
                 <p class="photo-counter" id="photo-counter">Photo 1 of 4</p>
                 <div class="countdown-number" id="countdown">3</div>
-                <p class="smile-text" id="smile-text"></p>
+                <p class="capture-feedback" id="capture-feedback"></p>
+                <p class="pose-suggestion" id="pose-suggestion"></p>
             </div>
         </div>
     </div>
@@ -206,6 +207,7 @@
         window.CURRENCY               = "{{ currency }}";
         window.PRICES                 = {{ prices | tojson }};
     </script>
+    <script src="/static/js/poses.js"></script>
     <script src="/static/js/app.js"></script>
     <script src="/static/js/inactivity.js"></script>
 </body>

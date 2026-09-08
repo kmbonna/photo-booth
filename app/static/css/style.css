@@ -473,7 +473,7 @@ html, body {
     transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
-.smile-text {
+.capture-feedback {
     font-family: var(--serif);
     font-size: 1.6rem;
     font-style: italic;
@@ -484,8 +484,18 @@ html, body {
     min-height: 2.4rem;
 }
 
-.smile-text.show {
+.capture-feedback.show {
     opacity: 1;
+}
+
+.pose-suggestion {
+    font-family: var(--body);
+    font-size: 1.1rem;
+    font-style: italic;
+    color: rgba(255,255,255,0.6);
+    text-shadow: 0 1px 8px rgba(0,0,0,0.4);
+    margin-top: 0.6rem;
+    min-height: 1.6rem;
 }
 
 /* ── Processing / Strip Screen ──────────────────────────── */

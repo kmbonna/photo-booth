@@ -6,6 +6,9 @@
 
 Things that would make the booth more interesting or profitable. None of these are blockers — they're additions for after the first version is live
 
+### Between-Shot Photo Preview
+After each capture, flash the just-taken photo on screen for 2–3 seconds before the next countdown starts. Customers react, laugh, adjust — builds anticipation for the strip. Fetch from `/sessions/{session_id}/photo_{n}.jpg`, show full-screen briefly, then fade into next countdown. Pure frontend change.
+
 ### Mood Filters
 Let the customer pick a look before the countdown starts. Add a new screen between payment and camera with 5–6 options. Each mood is a Pillow colour matrix applied to every photo before stitching.
 
@@ -59,6 +62,8 @@ Everything in this section needs to be done before the first paying customer.
 - [x] Set up `kiosk.service` systemd unit — Flask auto-starts on boot, restarts on crash
 - [ ] Lock down as a kiosk (disable keyboard shortcuts, auto-login, fullscreen Chromium)
 - [ ] Add `BOOTH_ID=arkan-001` (or equivalent) to `.env` — needed when central system comes online
+- [ ] Full security + error sweep — input validation, path traversal, error exposure, edge cases
+- [ ] UI polish pass — spacing, typography, mobile/touch feel, edge case screens
 
 ### Remote Access
 - [x] Tailscale installed on Pi and laptop — SSH works from any network
