@@ -65,51 +65,122 @@ def _polaroid_border(photo):
     base = np.array([248, 241, 225], dtype=np.float32)
     arr  = np.broadcast_to(base, (PHOTO_H, PHOTO_W, 3)).copy()
 
-    # Fine grain/texture across the whole border
-    arr += np.random.normal(0, 6, arr.shape)
+    # Grain/texture — stronger so it reads on screen too
+    arr += np.random.normal(0, 11, arr.shape)
 
-    # Corner aging — yellowed and slightly dingy at the corners
+    # Corner aging — pronounced yellowing and browning
     yy, xx = np.mgrid[0:PHOTO_H, 0:PHOTO_W].astype(np.float32)
     age = np.zeros((PHOTO_H, PHOTO_W), dtype=np.float32)
     for cy, cx in [(0, 0), (0, PHOTO_W-1), (PHOTO_H-1, 0), (PHOTO_H-1, PHOTO_W-1)]:
         dist = np.sqrt((yy - cy)**2 + (xx - cx)**2)
-        age += np.clip(1 - dist / 110, 0, 1)
+        age += np.clip(1 - dist / 130, 0, 1)
     age = np.clip(age, 0, 1)[:, :, np.newaxis]
-    arr[:, :, 0:1] += age * 14    # more red
-    arr[:, :, 1:2] += age * 4     # slight green
-    arr[:, :, 2:3] -= age * 28    # less blue → warm yellowing
+    arr[:, :, 0:1] += age * 22    # heavy red
+    arr[:, :, 1:2] += age * 8     # slight green
+    arr[:, :, 2:3] -= age * 40    # strong blue pull → deep yellowing
 
-    # Outer edge wear — subtle darkening at the very border edges
-    fade_px = 10
+    # Outer edge wear — more visible darkening
+    fade_px = 14
     for i in range(fade_px):
-        s = ((fade_px - i) / fade_px) ** 2 * 22
-        arr[i, :]            -= s
+        s = ((fade_px - i) / fade_px) ** 2 * 35
+        arr[i, :]                -= s
         arr[PHOTO_H - 1 - i, :] -= s
-        arr[:, i]            -= s
+        arr[:, i]                -= s
         arr[:, PHOTO_W - 1 - i] -= s
 
     arr = np.clip(arr, 0, 255).astype(np.uint8)
     bordered = Image.fromarray(arr)
     bordered.paste(inner, (PL, PT))
 
-    # Random fine scratches — only on the border, not the photo
+    # Scratches — more of them, slightly more visible
     draw = ImageDraw.Draw(bordered)
     rng  = np.random.default_rng()
-    for _ in range(int(rng.integers(2, 6))):
+    for _ in range(int(rng.integers(4, 9))):
         side = int(rng.integers(4))
-        if side == 0:    sx, sy = int(rng.integers(0, PHOTO_W)),     int(rng.integers(0, PT))
-        elif side == 1:  sx, sy = int(rng.integers(0, PHOTO_W)),     int(rng.integers(PT + inner_h, PHOTO_H))
-        elif side == 2:  sx, sy = int(rng.integers(0, PL)),          int(rng.integers(0, PHOTO_H))
-        else:            sx, sy = int(rng.integers(PL + inner_w, PHOTO_W)), int(rng.integers(0, PHOTO_H))
-        length = int(rng.integers(10, 55))
+        if side == 0:   sx, sy = int(rng.integers(0, PHOTO_W)),          int(rng.integers(0, PT))
+        elif side == 1: sx, sy = int(rng.integers(0, PHOTO_W)),          int(rng.integers(PT + inner_h, PHOTO_H))
+        elif side == 2: sx, sy = int(rng.integers(0, PL)),               int(rng.integers(0, PHOTO_H))
+        else:           sx, sy = int(rng.integers(PL + inner_w, PHOTO_W)), int(rng.integers(0, PHOTO_H))
+        length = int(rng.integers(15, 70))
         dx     = int(rng.integers(-length, length + 1))
-        dy     = int(rng.integers(-2, 3))
-        c      = int(rng.integers(185, 225))
-        draw.line([(sx, sy), (sx + dx, sy + dy)], fill=(c, c - 6, c - 18), width=1)
+        dy     = int(rng.integers(-3, 4))
+        c      = int(rng.integers(170, 215))
+        w      = 1 if rng.random() > 0.3 else 2
+        draw.line([(sx, sy), (sx + dx, sy + dy)], fill=(c, c - 8, c - 20), width=w)
 
     # Subtle inner shadow where border meets photo — makes it feel inset
     draw.rectangle([PL, PT, PL + inner_w - 1, PT + inner_h - 1],
                    outline=(178, 162, 138), width=1)
+
+    return bordered
+
+
+def _noir_border(photo):
+    """Worn B&W Polaroid border — cool silver-grey, heavy corner damage, aggressive wear."""
+    PL, PR, PT, PB = 14, 14, 12, 50
+    inner_w = PHOTO_W - PL - PR   # 812
+    inner_h = PHOTO_H - PT - PB   # 568
+
+    inner = photo.resize((inner_w, inner_h), Image.LANCZOS)
+
+    # Cool silver-grey base — no warmth, like old darkroom paper
+    base = np.array([232, 229, 225], dtype=np.float32)
+    arr  = np.broadcast_to(base, (PHOTO_H, PHOTO_W, 3)).copy()
+
+    # Heavier, cooler grain
+    arr += np.random.normal(0, 14, arr.shape)
+
+    # Heavy corner staining — near-black damage, cool tone
+    yy, xx = np.mgrid[0:PHOTO_H, 0:PHOTO_W].astype(np.float32)
+    damage = np.zeros((PHOTO_H, PHOTO_W), dtype=np.float32)
+    for cy, cx in [(0, 0), (0, PHOTO_W-1), (PHOTO_H-1, 0), (PHOTO_H-1, PHOTO_W-1)]:
+        dist = np.sqrt((yy - cy)**2 + (xx - cx)**2)
+        damage += np.clip(1 - dist / 120, 0, 1) ** 1.4
+    damage = np.clip(damage, 0, 1)[:, :, np.newaxis]
+    arr[:, :, 0:1] -= damage * 170
+    arr[:, :, 1:2] -= damage * 165
+    arr[:, :, 2:3] -= damage * 150   # blue pulled less → cool dark not warm dark
+
+    # One random corner gets catastrophic extra damage — like the top-left in the reference
+    rng = np.random.default_rng()
+    heavy_cy, heavy_cx = [(0,0),(0,PHOTO_W-1),(PHOTO_H-1,0),(PHOTO_H-1,PHOTO_W-1)][int(rng.integers(4))]
+    extra_dist = np.sqrt((yy - heavy_cy)**2 + (xx - heavy_cx)**2)
+    extra = np.clip(1 - extra_dist / 95, 0, 1) ** 0.7
+    arr[:, :, 0] -= extra * 75
+    arr[:, :, 1] -= extra * 72
+    arr[:, :, 2] -= extra * 65
+
+    # Aggressive edge darkening — left side gets hit harder like the reference
+    fade_px = 18
+    for i in range(fade_px):
+        s = ((fade_px - i) / fade_px) ** 1.4 * 55
+        arr[i, :]                -= s
+        arr[PHOTO_H - 1 - i, :] -= s
+        arr[:, i]                -= s * 1.4   # left edge: noticeably more worn
+        arr[:, PHOTO_W - 1 - i] -= s
+
+    arr = np.clip(arr, 0, 255).astype(np.uint8)
+    bordered = Image.fromarray(arr)
+    bordered.paste(inner, (PL, PT))
+
+    # More scratches, cool-toned, some thicker
+    draw = ImageDraw.Draw(bordered)
+    for _ in range(int(rng.integers(6, 12))):
+        side = int(rng.integers(4))
+        if side == 0:   sx, sy = int(rng.integers(0, PHOTO_W)),            int(rng.integers(0, PT))
+        elif side == 1: sx, sy = int(rng.integers(0, PHOTO_W)),            int(rng.integers(PT + inner_h, PHOTO_H))
+        elif side == 2: sx, sy = int(rng.integers(0, PL)),                 int(rng.integers(0, PHOTO_H))
+        else:           sx, sy = int(rng.integers(PL + inner_w, PHOTO_W)), int(rng.integers(0, PHOTO_H))
+        length = int(rng.integers(15, 85))
+        dx = int(rng.integers(-length, length + 1))
+        dy = int(rng.integers(-3, 4))
+        c  = int(rng.integers(150, 205))
+        w  = 1 if rng.random() > 0.25 else 2
+        draw.line([(sx, sy), (sx + dx, sy + dy)], fill=(c, c, c + 3), width=w)
+
+    # Cool inner shadow at photo edge
+    draw.rectangle([PL, PT, PL + inner_w - 1, PT + inner_h - 1],
+                   outline=(155, 153, 150), width=1)
 
     return bordered
 
@@ -141,12 +212,7 @@ def compose(session_id, mood='default'):
         if mood == '70s':
             strip.paste(_polaroid_border(photo), (mx, y))
         elif mood == 'noir':
-            # Contact sheet: thin white frame, no fill
-            draw.rectangle([mx - 3, y - 3, mx + PHOTO_W + 3, y + PHOTO_H + 3],
-                           outline=(60, 60, 60), width=3)
-            draw.rectangle([mx - 1, y - 1, mx + PHOTO_W + 1, y + PHOTO_H + 1],
-                           outline=(220, 220, 220), width=1)
-            strip.paste(photo, (mx, y))
+            strip.paste(_noir_border(photo), (mx, y))
         else:
             draw.rectangle([mx - 2, y - 2, mx + PHOTO_W + 1, y + PHOTO_H + 1],
                            outline=ACCENT, width=2)
