@@ -14,7 +14,7 @@ TOP_PAD  = 40
 BOTTOM_H = 90
 BOT_PAD  = 30
 
-STRIP_H = TOP_PAD + 4 * PHOTO_H + 3 * GAP + BOTTOM_H + BOT_PAD
+# STRIP_H is computed inside compose() based on PHOTOS_PER_SESSION
 
 # Per-mood strip palettes: (background, frame/accent, text)
 _PALETTES = {
@@ -59,15 +59,17 @@ def compose(session_id, mood='default'):
 
     BG, ACCENT, TEXT = _PALETTES.get(mood, _PALETTES['default'])
 
+    total   = int(os.environ.get('PHOTOS_PER_SESSION', 4))
+    strip_h = TOP_PAD + total * PHOTO_H + (total - 1) * GAP + BOTTOM_H + BOT_PAD
     photos = []
-    for i in range(1, 5):
+    for i in range(1, total + 1):
         path = os.path.join(session_dir, f'photo_{i}.jpg')
         if not os.path.exists(path):
             raise FileNotFoundError(f"photo_{i}.jpg missing for session {session_id}")
         img = _crop_center(Image.open(path).convert('RGB'), PHOTO_W, PHOTO_H)
         photos.append(moods.apply(img, mood))
 
-    strip = Image.new('RGB', (STRIP_W, STRIP_H), BG)
+    strip = Image.new('RGB', (STRIP_W, strip_h), BG)
     draw  = ImageDraw.Draw(strip)
 
     mx = (STRIP_W - PHOTO_W) // 2   # horizontal margin
@@ -100,7 +102,7 @@ def compose(session_id, mood='default'):
         y += PHOTO_H + GAP
 
     # Branding footer
-    line_y = STRIP_H - BOTTOM_H - BOT_PAD + 10
+    line_y = strip_h - BOTTOM_H - BOT_PAD + 10
     draw.line([(mx, line_y), (mx + PHOTO_W, line_y)], fill=ACCENT, width=1)
 
     f_title = _font(22, bold=True)
