@@ -1,6 +1,6 @@
 const POSES = [
     "Act natural — impossible",
-    "How about a Smile?",
+    "How about a smile?",
     "Strike your Model Pose",
     "Freeze mid-laugh",
     "Best villain pose",

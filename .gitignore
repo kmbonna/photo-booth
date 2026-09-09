@@ -37,3 +37,6 @@ Thumbs.db
 # Personal reference docs
 GIT_WORKFLOW.md
 *.docx
+*.png
+*.jpg
+*.jpeg
