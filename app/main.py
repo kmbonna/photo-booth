@@ -3,12 +3,12 @@ import os
 import uuid
 
 from dotenv import load_dotenv
-from flask import Flask, Response, jsonify, render_template, request, send_file
+from flask import Flask, Response, abort, jsonify, render_template, request, send_file, send_from_directory
 from werkzeug.exceptions import HTTPException
 
 load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
 
-from modules import log, reader
+from modules import log, reader, theme
 from modules.camera import capture_photo, generate_preview, is_ready
 from modules.composer import compose
 from modules.qr import generate_qr_bytes
@@ -55,7 +55,19 @@ def index():
             float(os.environ.get('PRICE_3', 220)),
             float(os.environ.get('PRICE_4', 240)),
         ],
+        text                  = theme.THEME['text'],
+        moods                 = theme.THEME['moods'],
+        theme_css             = theme.THEME['has_css'],
     )
+
+
+# ── GET /theme/<file>
+# Serves the active theme's assets (theme.css, images). 404 when no theme is set.
+@app.route('/theme/<path:filename>')
+def theme_asset(filename):
+    if not theme.THEME['dir'] or filename == 'theme.json':
+        abort(404)
+    return send_from_directory(theme.THEME['dir'], filename)
 
 
 # ── POST /event
@@ -132,10 +144,13 @@ def capture(session_id, photo_num):
 @app.route('/compose/<session_id>')
 def compose_strip(session_id):
     ctx = _ctx(session=session_id)
-    mood = request.args.get('mood', 'default')
+    mood = request.args.get('mood') or theme.mood_ids()[0]
+    if mood not in theme.mood_ids():
+        logger.error("compose rejected — mood '%s' not allowed by theme", mood, extra=ctx)
+        return jsonify({'status': 'error', 'message': 'mood not available'}), 400
     logger.info("composing strip mood=%s", mood, extra=ctx)
     try:
-        compose(session_id, mood)
+        compose(session_id, mood, theme.custom_mood(mood))
         logger.info("strip done", extra=ctx)
         return jsonify({'status': 'ok'})
     except FileNotFoundError as e:

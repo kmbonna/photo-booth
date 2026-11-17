@@ -1,0 +1,95 @@
+/* ── Winter theme ─────────────────────────────────────────
+   Frosty palette, gentle snowfall, snowflake start button.
+   Loaded after style.css; only overrides — no layout or flow changes. */
+
+:root {
+    --bg:          #f1f4f7;
+    --bg-card:     #e3eaf0;
+    --brown:       #1e2b3a;   /* main text, sprocket bars */
+    --brown-mid:   #4b5f75;
+    --brown-light: #8ea2b6;
+    --accent:      #3a6a96;
+    --line:        rgba(30, 43, 58, 0.14);
+    --vignette:    rgba(40, 70, 110, 0.13);
+}
+
+/* ── Snowfall: two slow layers of soft flakes, behind nothing interactive ── */
+body::before,
+body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 97;
+    pointer-events: none;
+    background-repeat: repeat;
+}
+body::before {
+    background-image:
+        radial-gradient(circle at 20% 30%, rgba(142, 172, 204, 0.55) 0 2px, transparent 3px),
+        radial-gradient(circle at 70% 10%, rgba(142, 172, 204, 0.45) 0 1.5px, transparent 2.5px),
+        radial-gradient(circle at 45% 75%, rgba(142, 172, 204, 0.5) 0 2px, transparent 3px),
+        radial-gradient(circle at 85% 60%, rgba(142, 172, 204, 0.4) 0 1.5px, transparent 2.5px);
+    /* different tile per layer so flakes don't line up in a grid */
+    background-size: 240px 240px, 310px 310px, 370px 370px, 290px 290px;
+    animation: snow-fall 26s linear infinite;
+}
+body::after {
+    background-image:
+        radial-gradient(circle at 35% 20%, rgba(142, 172, 204, 0.35) 0 3px, transparent 4px),
+        radial-gradient(circle at 80% 80%, rgba(142, 172, 204, 0.3) 0 2.5px, transparent 3.5px);
+    background-size: 380px 380px, 450px 450px;
+    animation: snow-fall-slow 40s linear infinite;
+}
+/* each layer travels exactly one tile height per loop → seamless */
+@keyframes snow-fall {
+    from { background-position: 0 0, 0 0, 0 0, 0 0; }
+    to   { background-position: 40px 240px, -30px 310px, 20px 370px, -15px 290px; }
+}
+@keyframes snow-fall-slow {
+    from { background-position: 0 0, 0 0; }
+    to   { background-position: -50px 380px, 35px 450px; }
+}
+
+/* No snow over the live camera preview */
+body:has(#screen-camera.active)::before,
+body:has(#screen-camera.active)::after { display: none; }
+
+/* ── Snowflake start button ── */
+#welcome-start-btn {
+    position: relative;
+    isolation: isolate;
+    width: 230px;
+    height: 230px;
+    padding: 0;
+    margin-top: 0;
+    background: transparent;
+    box-shadow: none;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--serif);
+    font-size: 1.2rem;
+    letter-spacing: 0.06em;
+    color: #fff;
+    transition: transform 0.25s ease;
+}
+#welcome-start-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: url('/theme/snowflake.svg') center / contain no-repeat;
+    filter: drop-shadow(0 6px 14px rgba(58, 106, 150, 0.25));
+    animation: flake-spin 40s linear infinite;
+}
+#welcome-start-btn:hover {
+    background: transparent;
+    box-shadow: none;
+    transform: scale(1.05);
+}
+#welcome-start-btn:active {
+    box-shadow: none;
+    transform: scale(0.95);
+}
+@keyframes flake-spin { to { transform: rotate(360deg); } }

@@ -68,7 +68,8 @@ function goTo(targetId) {
 // ── Payment flow ─────────────────────────────────────────
 let paymentController = null;
 let selectedCopies = 1;
-let selectedMood = 'default';
+const MOODS = window.MOODS && window.MOODS.length ? window.MOODS : ['default']; // from the active theme
+let selectedMood = MOODS[0];
 
 function _formatPrice(p) {
     return p % 1 === 0 ? `${p} ${window.CURRENCY}` : `${p.toFixed(2)} ${window.CURRENCY}`;
@@ -109,6 +110,12 @@ function selectCopies(n) {
 }
 
 function goToMood() {
+    // Theme offers a single mood → nothing to choose, go straight to payment.
+    if (MOODS.length === 1) {
+        selectedMood = MOODS[0];
+        goToPayment();
+        return;
+    }
     logEvent('copies → mood');
     inactivity.resume();
     goTo('screen-mood');
@@ -176,7 +183,7 @@ function cancelPayment() {
         paymentController = null;
     }
     inactivity.resume();
-    goTo('screen-mood');
+    goTo(MOODS.length === 1 ? 'screen-copies' : 'screen-mood');
 }
 
 // ── Error handling ───────────────────────────────────────
@@ -400,7 +407,7 @@ function resetBooth() {
     visitorId        = null;
     photosTaken      = 0;
     selectedCopies   = 1;
-    selectedMood     = 'default';
+    selectedMood     = MOODS[0];
     paymentConfirmed = false;
     capturing        = false;
     stripShown       = false;

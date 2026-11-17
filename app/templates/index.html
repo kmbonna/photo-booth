@@ -7,6 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/style.css">
+    {% if theme_css %}<link rel="stylesheet" href="/theme/theme.css">{% endif %}
 </head>
 <body>
 
@@ -29,10 +30,10 @@
         <div class="film-border bottom"></div>
 
         <div class="welcome-content">
-            <p class="eyebrow">&#9673; Now Showing &#9673;</p>
-            <h1 class="headline">Looking to<br><em>savour a moment?</em></h1>
-            <p class="subline">Step inside. Make it last.</p>
-            <button class="btn-primary" id="welcome-start-btn" onclick="goToSteps()">Let's Go</button>
+            <p class="eyebrow">{{ text.welcome_eyebrow | safe }}</p>
+            <h1 class="headline">{{ text.welcome_headline | safe }}</h1>
+            <p class="subline">{{ text.welcome_subline | safe }}</p>
+            <button class="btn-primary" id="welcome-start-btn" onclick="goToSteps()"><span>{{ text.start_button | safe }}</span></button>
             <p class="oos-message" id="welcome-oos" style="display:none">Temporarily out of service</p>
         </div>
     </div>
@@ -103,22 +104,15 @@
             <p class="eyebrow">&#9673; Choose Your Look &#9673;</p>
             <h2 class="headline"><em>Pick a filter</em></h2>
 
+            <!-- Built from the active theme's mood list (modules/theme.py) -->
             <div class="mood-grid">
-                <button class="btn-mood" onclick="selectMood('default')">
-                    <div class="mood-swatch swatch-default"></div>
-                    <span class="mood-name">Default</span>
-                    <span class="mood-desc">Sometimes, less is more</span>
+                {% for m in moods %}
+                <button class="btn-mood" onclick="selectMood('{{ m.id }}')">
+                    <div class="mood-swatch swatch-{{ m.id }}"{% if m.swatch %} style="background: {{ m.swatch }}"{% endif %}></div>
+                    <span class="mood-name">{{ m.label | safe }}</span>
+                    <span class="mood-desc">{{ m.desc | safe }}</span>
                 </button>
-                <button class="btn-mood" onclick="selectMood('noir')">
-                    <div class="mood-swatch swatch-noir"></div>
-                    <span class="mood-name">Noir</span>
-                    <span class="mood-desc">Silver screen &amp; timeless</span>
-                </button>
-                <button class="btn-mood" onclick="selectMood('70s')">
-                    <div class="mood-swatch swatch-70s"></div>
-                    <span class="mood-name">70s</span>
-                    <span class="mood-desc">From your parents' photo album</span>
-                </button>
+                {% endfor %}
             </div>
 
             <button class="btn-secondary" onclick="goToCopies()">&#8592; Back</button>
@@ -238,6 +232,7 @@
         window.PAYMENT_DEV_MODE       = {{ 'true' if payment_dev_mode else 'false' }};
         window.CURRENCY               = "{{ currency }}";
         window.PRICES                 = {{ prices | tojson }};
+        window.MOODS                  = {{ moods | map(attribute='id') | list | tojson }};
     </script>
     <script src="/static/js/poses.js"></script>
     <script src="/static/js/app.js"></script>

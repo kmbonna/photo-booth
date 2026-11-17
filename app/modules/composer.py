@@ -185,12 +185,40 @@ def _noir_border(photo):
     return bordered
 
 
-def compose(session_id, mood='default'):
-    """Build the 4-photo strip and save it as strip.jpg in the session folder."""
+def _load_frame(path):
+    """Theme frame PNG resized to photo size, or None if missing/unreadable."""
+    try:
+        return Image.open(path).convert('RGBA').resize((PHOTO_W, PHOTO_H), Image.LANCZOS)
+    except (OSError, ValueError) as e:
+        logger.error("custom frame unreadable (%s): %s — composing without it", path, e)
+        return None
+
+
+def compose(session_id, mood='default', custom=None):
+    """Build the 4-photo strip and save it as strip.jpg in the session folder.
+
+    custom: a theme's custom-mood definition (see modules/theme.py). When given,
+    `mood` is only a label — grading, border, colours and footer come from it.
+    """
     base = os.environ.get('SESSIONS_DIR') or os.path.join(os.path.dirname(__file__), '..', 'sessions')
     session_dir = os.path.normpath(os.path.join(base, session_id))
 
-    BG, ACCENT, TEXT = _PALETTES.get(mood, _PALETTES['default'])
+    footer = 'photobooth'
+    frame  = None
+    if custom:
+        BG, ACCENT, TEXT = _PALETTES['default']
+        BG     = tuple(custom.get('background', BG))
+        ACCENT = tuple(custom.get('accent', ACCENT))
+        TEXT   = tuple(custom.get('text', TEXT))
+        footer = custom.get('footer', footer)
+        border = custom.get('border', 'plain')
+        grade  = custom.get('grade', 'default')
+        if custom.get('frame_path'):
+            frame = _load_frame(custom['frame_path'])
+    else:
+        BG, ACCENT, TEXT = _PALETTES.get(mood, _PALETTES['default'])
+        border = {'70s': 'polaroid', 'noir': 'noir'}.get(mood, 'plain')
+        grade  = mood
 
     total   = int(os.environ.get('PHOTOS_PER_SESSION', 4))
     strip_h = TOP_PAD + total * PHOTO_H + (total - 1) * GAP + BOTTOM_H + BOT_PAD
@@ -200,7 +228,7 @@ def compose(session_id, mood='default'):
         if not os.path.exists(path):
             raise FileNotFoundError(f"photo_{i}.jpg missing for session {session_id}")
         img = _crop_center(Image.open(path).convert('RGB'), PHOTO_W, PHOTO_H)
-        photos.append(moods.apply(img, mood))
+        photos.append(moods.apply(img, grade))
 
     strip = Image.new('RGB', (STRIP_W, strip_h), BG)
     draw  = ImageDraw.Draw(strip)
@@ -209,14 +237,16 @@ def compose(session_id, mood='default'):
     y  = TOP_PAD
 
     for photo in photos:
-        if mood == '70s':
+        if border == 'polaroid':
             strip.paste(_polaroid_border(photo), (mx, y))
-        elif mood == 'noir':
+        elif border == 'noir':
             strip.paste(_noir_border(photo), (mx, y))
         else:
             draw.rectangle([mx - 2, y - 2, mx + PHOTO_W + 1, y + PHOTO_H + 1],
                            outline=ACCENT, width=2)
             strip.paste(photo, (mx, y))
+        if frame is not None:
+            strip.paste(frame, (mx, y), frame)
         y += PHOTO_H + GAP
 
     # Branding footer
@@ -225,7 +255,7 @@ def compose(session_id, mood='default'):
 
     f_title = _font(22, bold=True)
     f_date  = _font(15)
-    draw.text((STRIP_W // 2, line_y + 14), 'photobooth',
+    draw.text((STRIP_W // 2, line_y + 14), footer,
               font=f_title, fill=TEXT,   anchor='mt')
     draw.text((STRIP_W // 2, line_y + 46), datetime.now().strftime('%d %b %Y'),
               font=f_date,  fill=ACCENT, anchor='mt')
