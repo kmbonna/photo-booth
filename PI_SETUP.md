@@ -52,6 +52,30 @@ Replace `NetworkName` and `password`. The Pi connects automatically whenever it'
 
 ---
 
+## Rescue Network (do this on every Pi)
+
+If the Pi loses its normal WiFi (venue changed the password, login page expired, router died), there is no way to reach it remotely. To avoid getting locked out, every Pi has a **rescue network** saved, with the highest priority:
+
+```bash
+sudo nmcli con add type wifi ifname wlan0 con-name booth-rescue ssid booth-rescue wifi-sec.key-mgmt wpa-psk wifi-sec.psk "RESCUE_PASSWORD"
+sudo nmcli con modify booth-rescue connection.autoconnect-priority 100
+```
+
+Pick one password for `RESCUE_PASSWORD`, use it on every booth, and keep it somewhere safe. It is not stored in this repo.
+
+Check it's saved:
+```bash
+nmcli con show | grep booth-rescue
+```
+
+**When a booth goes offline:**
+1. You (or anyone at the venue) turn on a phone or laptop hotspot named exactly `booth-rescue` with the rescue password. This is case-sensitive, and the hotspot must have internet.
+2. Within 1–2 minutes the Pi joins it. If not, unplug and replug the Pi.
+3. SSH in through Tailscale as usual (`ssh pbpi-1@100.69.73.14`).
+4. Fix or add the real network (see "Add a New WiFi Network" above), then turn the hotspot off.
+
+> Also avoid venue WiFi with a login/"Accept" page. The Pi can't log in, and those logins expire.
+
 ---
 
 ## Connect to a Saved Network Manually

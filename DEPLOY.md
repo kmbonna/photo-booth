@@ -131,6 +131,10 @@ PRICE_2=190
 PRICE_3=220
 PRICE_4=240
 
+# Theme (folder in app/themes, blank = default look)
+THEME=
+THEMES_DIR=
+
 # Dev mode
 PAYMENT_DEV_MODE=false
 

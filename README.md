@@ -40,6 +40,9 @@ app/
     reader.py          # NFC reader
     qr.py              # QR code generation
     log.py             # Structured logging
+    theme.py           # Loads THEME: UI text, allowed moods, custom event moods
+  themes/
+    winter/            # theme.json (text, moods), theme.css (look), assets
   templates/
     index.html         # Single-page kiosk UI
   static/
@@ -61,6 +64,8 @@ All tunables live in `.env` — see the template in `DEPLOY.md`. Key ones:
 | `CURRENCY` | Currency label shown on screen |
 | `COUNTDOWN_SECS` | Countdown seconds before each shot |
 | `PAYMENT_DEV_MODE` | Show manual approve button instead of NFC |
+| `THEME` | Theme folder name in `app/themes/` (e.g. `winter`). Blank = default look |
+| `THEMES_DIR` | Where theme folders live. Blank = `app/themes` (use an outside folder for client event themes) |
 
 ## Setup
 
